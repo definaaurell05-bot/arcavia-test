@@ -1,0 +1,1444 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arcavia — The Three Trials of the Seven Seals</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root {
+    --gold: #D4AF37;
+    --gold-light: #F0D060;
+    --gold-dim: #8B7020;
+    --deep: #0A0612;
+    --deep2: #110920;
+    --deep3: #1A0F2E;
+    --purple: #3D1F6B;
+    --purple-light: #6B3FA0;
+    --seal1: #C0392B;
+    --seal2: #1A6B4A;
+    --seal3: #1A3A6B;
+    --text: #E8DCC8;
+    --text-dim: #9A8870;
+    --ring-color: #D4AF37;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Crimson Text', serif;
+    background: var(--deep);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+    cursor: default;
+  }
+
+  /* STARFIELD */
+  #stars {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 0;
+    background:
+      radial-gradient(ellipse at 20% 50%, rgba(61,31,107,0.3) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 20%, rgba(26,15,46,0.5) 0%, transparent 50%),
+      var(--deep);
+  }
+  #stars canvas { position: absolute; top: 0; left: 0; }
+
+  /* SCREENS */
+  .screen {
+    position: relative; z-index: 1;
+    min-height: 100vh;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+  }
+  .screen.active { display: flex; }
+
+  /* ===== LANDING ===== */
+  .landing-seal {
+    width: 180px; height: 180px;
+    border: 2px solid var(--gold-dim);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 2rem;
+    position: relative;
+    animation: sealPulse 3s ease-in-out infinite;
+  }
+  .landing-seal::before {
+    content: '';
+    position: absolute; inset: -8px;
+    border-radius: 50%;
+    border: 1px solid rgba(212,175,55,0.2);
+    animation: sealPulse 3s ease-in-out infinite reverse;
+  }
+  .landing-seal svg { width: 120px; height: 120px; opacity: 0.9; }
+  @keyframes sealPulse {
+    0%,100% { box-shadow: 0 0 20px rgba(212,175,55,0.2), inset 0 0 20px rgba(212,175,55,0.05); }
+    50% { box-shadow: 0 0 60px rgba(212,175,55,0.4), inset 0 0 40px rgba(212,175,55,0.1); }
+  }
+
+  .title-main {
+    font-family: 'Cinzel Decorative', cursive;
+    font-size: clamp(1.4rem, 5vw, 2.2rem);
+    color: var(--gold);
+    text-align: center;
+    letter-spacing: 0.05em;
+    line-height: 1.3;
+    text-shadow: 0 0 40px rgba(212,175,55,0.5);
+    margin-bottom: 0.5rem;
+  }
+  .title-sub {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(0.75rem, 2.5vw, 0.95rem);
+    color: var(--text-dim);
+    text-align: center;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+  .tagline {
+    font-style: italic;
+    color: rgba(212,175,55,0.6);
+    font-size: clamp(0.85rem, 2.5vw, 1rem);
+    text-align: center;
+    margin-bottom: 2.5rem;
+    max-width: 400px;
+  }
+
+  /* NAME INPUT */
+  .name-form {
+    width: 100%; max-width: 360px;
+    display: flex; flex-direction: column; gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .name-form label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+  }
+  .name-form input {
+    width: 100%;
+    background: rgba(212,175,55,0.05);
+    border: 1px solid var(--gold-dim);
+    border-radius: 4px;
+    padding: 0.75rem 1rem;
+    font-family: 'Crimson Text', serif;
+    font-size: 1.1rem;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    text-align: center;
+  }
+  .name-form input:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 20px rgba(212,175,55,0.2);
+  }
+  .name-form input::placeholder { color: var(--text-dim); opacity: 0.5; }
+
+  /* BUTTONS */
+  .btn-primary {
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--deep);
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 50%, var(--gold) 100%);
+    border: none;
+    padding: 0.9rem 2.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-primary::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.3) 50%, transparent 60%);
+    transform: translateX(-100%);
+    transition: transform 0.5s;
+  }
+  .btn-primary:hover::before { transform: translateX(100%); }
+  .btn-primary:hover { box-shadow: 0 0 30px rgba(212,175,55,0.5); transform: translateY(-2px); }
+  .btn-primary:active { transform: translateY(0); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  .btn-ghost {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    background: transparent;
+    border: 1px solid rgba(212,175,55,0.2);
+    padding: 0.6rem 1.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  .btn-ghost:hover { border-color: var(--gold-dim); color: var(--gold); }
+
+  /* ===== QUIZ SCREEN ===== */
+  .kuil-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    width: 100%; max-width: 600px;
+  }
+  .kuil-badge {
+    display: inline-block;
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 0.3rem 1rem;
+    border-radius: 2px;
+    margin-bottom: 0.75rem;
+  }
+  .kuil-badge.k1 { background: rgba(192,57,43,0.2); color: #E74C3C; border: 1px solid rgba(192,57,43,0.4); }
+  .kuil-badge.k2 { background: rgba(26,107,74,0.2); color: #2ECC71; border: 1px solid rgba(26,107,74,0.4); }
+  .kuil-badge.k3 { background: rgba(26,58,107,0.2); color: #5DADE2; border: 1px solid rgba(26,58,107,0.4); }
+
+  .kuil-title {
+    font-family: 'Cinzel Decorative', cursive;
+    font-size: clamp(1rem, 4vw, 1.5rem);
+    color: var(--gold);
+    margin-bottom: 0.25rem;
+  }
+  .kuil-subtitle {
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+  }
+
+  /* PROGRESS */
+  .progress-wrap {
+    width: 100%; max-width: 500px;
+    margin-bottom: 2rem;
+  }
+  .progress-label {
+    display: flex; justify-content: space-between;
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+    margin-bottom: 0.5rem;
+  }
+  .progress-bar {
+    height: 4px;
+    background: rgba(212,175,55,0.1);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold-dim), var(--gold));
+    border-radius: 2px;
+    transition: width 0.5s ease;
+    box-shadow: 0 0 8px rgba(212,175,55,0.5);
+  }
+
+  /* RINGS DISPLAY */
+  .rings-display {
+    display: flex; gap: 0.5rem;
+    margin-bottom: 2rem;
+  }
+  .ring-item {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    border: 2px solid var(--gold-dim);
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.5s;
+    font-size: 0.8rem;
+  }
+  .ring-item.earned {
+    background: radial-gradient(circle, var(--gold-light), var(--gold));
+    border-color: var(--gold);
+    box-shadow: 0 0 12px rgba(212,175,55,0.6);
+    animation: ringEarn 0.5s ease;
+  }
+  @keyframes ringEarn {
+    0% { transform: scale(0) rotate(-180deg); }
+    70% { transform: scale(1.3) rotate(10deg); }
+    100% { transform: scale(1) rotate(0); }
+  }
+
+  /* QUESTION CARD */
+  .question-card {
+    width: 100%; max-width: 560px;
+    background: rgba(17,9,32,0.8);
+    border: 1px solid rgba(212,175,55,0.2);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    backdrop-filter: blur(10px);
+    animation: fadeSlideIn 0.4s ease;
+  }
+  @keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .question-card.shake {
+    animation: shake 0.4s ease;
+  }
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20% { transform: translateX(-8px); }
+    40% { transform: translateX(8px); }
+    60% { transform: translateX(-5px); }
+    80% { transform: translateX(5px); }
+  }
+
+  .question-num {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+  }
+  .question-text {
+    font-size: clamp(1rem, 3vw, 1.2rem);
+    line-height: 1.6;
+    color: var(--text);
+    margin-bottom: 1.5rem;
+  }
+
+  /* OPTIONS */
+  .options { display: flex; flex-direction: column; gap: 0.6rem; }
+  .option-btn {
+    width: 100%;
+    background: rgba(212,175,55,0.03);
+    border: 1px solid rgba(212,175,55,0.15);
+    border-radius: 6px;
+    padding: 0.8rem 1rem;
+    text-align: left;
+    font-family: 'Crimson Text', serif;
+    font-size: 1rem;
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.25s;
+    display: flex; align-items: center; gap: 0.75rem;
+  }
+  .option-btn:hover:not(:disabled) {
+    background: rgba(212,175,55,0.08);
+    border-color: var(--gold-dim);
+    transform: translateX(4px);
+  }
+  .option-btn .opt-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    min-width: 18px;
+  }
+  .option-btn.correct {
+    background: rgba(46,204,113,0.15);
+    border-color: #2ECC71;
+    color: #A8F0C8;
+    box-shadow: 0 0 15px rgba(46,204,113,0.2);
+  }
+  .option-btn.wrong {
+    background: rgba(231,76,60,0.15);
+    border-color: #E74C3C;
+    color: #F0A8A8;
+  }
+  .option-btn:disabled { cursor: default; }
+
+  /* FEEDBACK */
+  .feedback-msg {
+    text-align: center;
+    font-size: 1.1rem;
+    margin: 1rem 0;
+    min-height: 1.5rem;
+    font-style: italic;
+    transition: all 0.3s;
+  }
+  .feedback-msg.correct { color: #2ECC71; }
+  .feedback-msg.wrong { color: #E74C3C; }
+
+  /* ===== STAGE COMPLETE ===== */
+  .stage-complete {
+    text-align: center;
+    max-width: 480px;
+  }
+  .seal-icon {
+    width: 120px; height: 120px;
+    margin: 0 auto 1.5rem;
+    animation: sealReveal 1s ease forwards;
+  }
+  @keyframes sealReveal {
+    0% { transform: scale(0) rotate(-90deg); opacity: 0; }
+    60% { transform: scale(1.1) rotate(5deg); opacity: 1; }
+    100% { transform: scale(1) rotate(0); }
+  }
+  .seal-title {
+    font-family: 'Cinzel Decorative', cursive;
+    font-size: clamp(1rem, 4vw, 1.4rem);
+    color: var(--gold);
+    margin-bottom: 0.5rem;
+  }
+  .seal-desc {
+    color: var(--text-dim);
+    font-style: italic;
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+  }
+  .rings-earned-display {
+    display: flex; gap: 0.5rem; justify-content: center;
+    margin-bottom: 2rem;
+  }
+
+  /* ===== FINAL SCREEN ===== */
+  .final-score {
+    font-family: 'Cinzel Decorative', cursive;
+    font-size: clamp(3rem, 10vw, 5rem);
+    color: var(--gold);
+    text-shadow: 0 0 40px rgba(212,175,55,0.6);
+    line-height: 1;
+    margin: 1rem 0 0.5rem;
+  }
+  .final-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+  }
+  .final-msg {
+    font-size: 1.15rem;
+    font-style: italic;
+    color: var(--text-dim);
+    text-align: center;
+    max-width: 380px;
+    line-height: 1.7;
+    margin-bottom: 2rem;
+  }
+
+  /* ===== ADMIN PANEL ===== */
+  #admin-screen {
+    background: #0F0F1A;
+    align-items: stretch;
+    justify-content: flex-start;
+    padding: 0;
+  }
+  .admin-nav {
+    background: #1A1A2E;
+    border-bottom: 1px solid rgba(212,175,55,0.2);
+    padding: 1rem 1.5rem;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 0.5rem;
+  }
+  .admin-nav-title {
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    color: var(--gold);
+    letter-spacing: 0.1em;
+  }
+  .admin-body { padding: 1.5rem; max-width: 900px; margin: 0 auto; width: 100%; }
+
+  .admin-tabs {
+    display: flex; gap: 0.5rem; margin-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(212,175,55,0.15);
+    padding-bottom: 0.5rem;
+  }
+  .admin-tab {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    background: transparent;
+    border: none;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    border-radius: 4px 4px 0 0;
+    transition: all 0.2s;
+  }
+  .admin-tab.active { color: var(--gold); background: rgba(212,175,55,0.08); }
+  .admin-tab:hover:not(.active) { color: var(--text); }
+
+  .admin-panel { display: none; }
+  .admin-panel.active { display: block; }
+
+  /* STATS CARDS */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem; margin-bottom: 1.5rem;
+  }
+  .stat-card {
+    background: #1A1A2E;
+    border: 1px solid rgba(212,175,55,0.15);
+    border-radius: 8px;
+    padding: 1rem;
+    text-align: center;
+  }
+  .stat-num {
+    font-family: 'Cinzel Decorative', cursive;
+    font-size: 2rem;
+    color: var(--gold);
+    line-height: 1;
+  }
+  .stat-lbl {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-top: 0.3rem;
+  }
+
+  /* TABLE */
+  .admin-table-wrap { overflow-x: auto; border-radius: 8px; border: 1px solid rgba(212,175,55,0.15); }
+  table {
+    width: 100%; border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+  th {
+    background: #1A1A2E;
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid rgba(212,175,55,0.15);
+  }
+  td {
+    padding: 0.65rem 1rem;
+    border-bottom: 1px solid rgba(212,175,55,0.06);
+    color: var(--text);
+    vertical-align: top;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(212,175,55,0.03); }
+
+  .ring-pill {
+    display: inline-flex; align-items: center; gap: 0.3rem;
+    background: rgba(212,175,55,0.1);
+    border: 1px solid rgba(212,175,55,0.3);
+    border-radius: 20px;
+    padding: 0.15rem 0.6rem;
+    font-size: 0.8rem;
+    color: var(--gold);
+  }
+
+  /* QUESTION EDITOR */
+  .q-editor {
+    background: #1A1A2E;
+    border: 1px solid rgba(212,175,55,0.15);
+    border-radius: 8px;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+  }
+  .q-editor-header {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    color: var(--gold);
+    letter-spacing: 0.1em;
+    margin-bottom: 1rem;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .q-field {
+    width: 100%;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(212,175,55,0.15);
+    border-radius: 4px;
+    padding: 0.6rem 0.75rem;
+    font-family: 'Crimson Text', serif;
+    font-size: 0.95rem;
+    color: var(--text);
+    outline: none;
+    margin-bottom: 0.5rem;
+    transition: border-color 0.2s;
+  }
+  .q-field:focus { border-color: var(--gold-dim); }
+  .q-options-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 0.5rem; margin-bottom: 0.5rem;
+  }
+  .q-correct-wrap {
+    display: flex; align-items: center; gap: 0.5rem;
+    font-size: 0.85rem; color: var(--text-dim); margin-top: 0.25rem;
+  }
+  .q-correct-wrap select {
+    background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(212,175,55,0.15);
+    border-radius: 4px;
+    padding: 0.35rem 0.5rem;
+    color: var(--text);
+    font-family: 'Crimson Text', serif;
+    font-size: 0.9rem;
+    outline: none;
+  }
+
+  /* ADMIN LOGIN */
+  .admin-login-wrap {
+    max-width: 340px; width: 100%;
+    background: rgba(17,9,32,0.9);
+    border: 1px solid rgba(212,175,55,0.2);
+    border-radius: 8px;
+    padding: 2rem;
+    text-align: center;
+  }
+  .admin-login-wrap h2 {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    color: var(--gold);
+    margin-bottom: 1.5rem;
+    letter-spacing: 0.1em;
+  }
+
+  /* DIVIDER */
+  .ornamented-divider {
+    display: flex; align-items: center; gap: 1rem;
+    margin: 1.5rem 0; color: var(--gold-dim);
+    font-size: 1rem;
+  }
+  .ornamented-divider::before, .ornamented-divider::after {
+    content: ''; flex: 1;
+    height: 1px; background: rgba(212,175,55,0.2);
+  }
+
+  /* TOAST */
+  #toast {
+    position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%);
+    background: rgba(17,9,32,0.95);
+    border: 1px solid var(--gold-dim);
+    border-radius: 6px;
+    padding: 0.75rem 1.5rem;
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    color: var(--gold);
+    letter-spacing: 0.05em;
+    z-index: 1000;
+    opacity: 0; transition: opacity 0.3s;
+    pointer-events: none; white-space: nowrap;
+  }
+  #toast.show { opacity: 1; }
+
+  /* LOADING */
+  .loading-rune {
+    width: 48px; height: 48px;
+    border: 2px solid rgba(212,175,55,0.1);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 2rem auto;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ADMIN TRIGGER */
+  #admin-trigger {
+    position: fixed; bottom: 1rem; right: 1rem;
+    background: transparent; border: none;
+    color: rgba(212,175,55,0.15);
+    font-size: 0.6rem; cursor: pointer;
+    font-family: 'Cinzel', serif;
+    letter-spacing: 0.1em;
+    z-index: 100;
+    transition: color 0.3s;
+  }
+  #admin-trigger:hover { color: rgba(212,175,55,0.4); }
+
+  .separator { height: 1px; background: rgba(212,175,55,0.1); margin: 1rem 0; }
+
+  @media (max-width: 480px) {
+    .q-options-grid { grid-template-columns: 1fr; }
+    .admin-body { padding: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<div id="stars"><canvas id="starsCanvas"></canvas></div>
+
+<!-- ===== LANDING ===== -->
+<div id="landing-screen" class="screen active">
+  <div class="landing-seal">
+    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="50,5 61,35 95,35 68,57 79,91 50,70 21,91 32,57 5,35 39,35" fill="none" stroke="#D4AF37" stroke-width="1.5" opacity="0.6"/>
+      <circle cx="50" cy="50" r="22" fill="none" stroke="#D4AF37" stroke-width="1" opacity="0.8"/>
+      <path d="M50 28 L50 15 M50 72 L50 85 M28 50 L15 50 M72 50 L85 50" stroke="#D4AF37" stroke-width="1" opacity="0.4"/>
+      <circle cx="50" cy="50" r="4" fill="#D4AF37" opacity="0.9"/>
+      <path d="M50 35 L55 47 L50 58 L45 47 Z" fill="#D4AF37" opacity="0.5"/>
+    </svg>
+  </div>
+
+  <div class="title-main">Arcavia</div>
+  <div class="title-sub">The Three Trials of the Seven Seals</div>
+  <div class="tagline">"Lining the new path of journey through written arrows"</div>
+
+  <div class="name-form">
+    <label for="player-name">Nama Pemanah</label>
+    <input type="text" id="player-name" placeholder="Tulis namamu di sini..." maxlength="40" autocomplete="off">
+  </div>
+
+  <button class="btn-primary" id="start-btn" onclick="startJourney()">
+    ✦ Mulai Perjalanan ✦
+  </button>
+
+  <div style="margin-top: 1.5rem; font-size: 0.85rem; color: var(--text-dim); text-align: center; font-style: italic; max-width: 320px; line-height: 1.6;">
+    Tiga segel menanti. Tujuh cincin tersembunyi.<br>Tuliskan legenda-mu melalui anak panah pengetahuan.
+  </div>
+</div>
+
+<!-- ===== QUIZ SCREEN ===== -->
+<div id="quiz-screen" class="screen">
+  <div class="kuil-header">
+    <div class="kuil-badge" id="kuil-badge">Kuil 1</div>
+    <div class="kuil-title" id="kuil-title">The History of Archery</div>
+    <div class="kuil-subtitle" id="kuil-subtitle">Segel Pertama — Seal of Origins</div>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-label">
+      <span id="q-progress-text">Pertanyaan 1 dari 2</span>
+      <span id="rings-count">0 / 7 Cincin</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+  </div>
+
+  <div class="rings-display" id="rings-display"></div>
+
+  <div class="question-card" id="question-card">
+    <div class="question-num" id="question-num">PERTANYAAN 1</div>
+    <div class="question-text" id="question-text">Loading...</div>
+    <div class="options" id="options-wrap"></div>
+  </div>
+
+  <div class="feedback-msg" id="feedback-msg"></div>
+</div>
+
+<!-- ===== STAGE COMPLETE ===== -->
+<div id="stage-screen" class="screen">
+  <div class="stage-complete">
+    <div class="seal-icon" id="seal-icon">
+      <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="60" cy="60" r="55" stroke="#D4AF37" stroke-width="1.5" opacity="0.3"/>
+        <circle cx="60" cy="60" r="45" stroke="#D4AF37" stroke-width="1" opacity="0.5"/>
+        <polygon id="seal-poly" points="60,15 72,47 107,47 80,67 90,100 60,80 30,100 40,67 13,47 48,47" fill="none" stroke="#D4AF37" stroke-width="1.5"/>
+        <circle cx="60" cy="60" r="8" fill="#D4AF37" opacity="0.8"/>
+      </svg>
+    </div>
+    <div class="kuil-badge" id="stage-badge" style="margin: 0 auto 1rem;">Segel Terbuka</div>
+    <div class="seal-title" id="stage-title">Seal of Origins</div>
+    <div class="seal-desc" id="stage-desc">Kamu telah membuka segel pertama. Pengetahuan sejarah memanah telah terukir dalam kisahmu.</div>
+    <div class="rings-earned-display" id="stage-rings"></div>
+    <button class="btn-primary" id="next-stage-btn" onclick="proceedToNext()">
+      ✦ Lanjut ke Ujian Berikutnya ✦
+    </button>
+  </div>
+</div>
+
+<!-- ===== FINAL SCREEN ===== -->
+<div id="final-screen" class="screen">
+  <div class="landing-seal" style="width:140px;height:140px;">
+    <svg viewBox="0 0 100 100" fill="none">
+      <polygon points="50,5 61,35 95,35 68,57 79,91 50,70 21,91 32,57 5,35 39,35" fill="rgba(212,175,55,0.2)" stroke="#D4AF37" stroke-width="1.5"/>
+      <circle cx="50" cy="50" r="15" fill="#D4AF37" opacity="0.9"/>
+    </svg>
+  </div>
+  <div class="title-sub" style="margin-bottom:0.25rem;">Semua Segel Telah Terbuka</div>
+  <div class="final-score" id="final-score">7</div>
+  <div class="final-label">Cincin Legenda Terkumpul</div>
+  <div class="rings-display" id="final-rings" style="justify-content:center;margin-bottom:1rem;flex-wrap:wrap;"></div>
+  <div class="final-msg" id="final-msg">Legenda telah tertulis. Namamu akan dikenang.</div>
+  <div class="ornamented-divider">✦</div>
+  <button class="btn-primary" onclick="restartQuiz()" style="margin-bottom:0.75rem;">
+    ✦ Mulai Lagi ✦
+  </button>
+</div>
+
+<!-- ===== ADMIN LOGIN ===== -->
+<div id="admin-login-screen" class="screen">
+  <div class="admin-login-wrap">
+    <h2>⚜ Admin Arcavia</h2>
+    <input type="password" id="admin-pass-input" class="q-field" placeholder="Password admin..." style="text-align:center;">
+    <div style="height:0.75rem;"></div>
+    <button class="btn-primary" onclick="checkAdminPass()" style="width:100%;">Masuk</button>
+    <div style="height:0.75rem;"></div>
+    <button class="btn-ghost" onclick="showScreen('landing-screen')" style="width:100%;">Kembali</button>
+    <div id="admin-pass-err" style="color:#E74C3C;font-size:0.8rem;margin-top:0.75rem;min-height:1.2rem;"></div>
+  </div>
+</div>
+
+<!-- ===== ADMIN PANEL ===== -->
+<div id="admin-screen" class="screen">
+  <div class="admin-nav">
+    <div class="admin-nav-title">⚜ Admin Panel — Arcavia Quiz</div>
+    <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+      <button class="btn-ghost" onclick="loadAdminData()" style="font-size:0.7rem;padding:0.4rem 0.8rem;">↻ Refresh</button>
+      <button class="btn-ghost" onclick="confirmDeleteAll()" style="font-size:0.7rem;padding:0.4rem 0.8rem;border-color:rgba(231,76,60,0.3);color:#E74C3C;">🗑 Hapus Semua Data Test</button>
+      <button class="btn-ghost" onclick="showScreen('landing-screen')" style="font-size:0.7rem;padding:0.4rem 0.8rem;">✕ Keluar</button>
+    </div>
+  </div>
+  <div class="admin-body">
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-num" id="stat-total">—</div><div class="stat-lbl">Total Peserta</div></div>
+      <div class="stat-card"><div class="stat-num" id="stat-avg">—</div><div class="stat-lbl">Rata-rata Cincin</div></div>
+      <div class="stat-card"><div class="stat-num" id="stat-perfect">—</div><div class="stat-lbl">Skor Sempurna</div></div>
+      <div class="stat-card"><div class="stat-num" id="stat-today">—</div><div class="stat-lbl">Hari Ini</div></div>
+    </div>
+
+    <div class="admin-tabs">
+      <button class="admin-tab active" onclick="switchAdminTab('participants')">Peserta</button>
+      <button class="admin-tab" onclick="switchAdminTab('questions')">Edit Soal</button>
+    </div>
+
+    <!-- PARTICIPANTS TAB -->
+    <div id="tab-participants" class="admin-panel active">
+      <div id="participants-loading" class="loading-rune"></div>
+      <div id="delete-bar" style="display:none;margin-bottom:0.75rem;display:none;align-items:center;gap:0.75rem;flex-wrap:wrap;">
+        <span id="selected-count" style="font-family:'Cinzel',serif;font-size:0.75rem;color:var(--text-dim);letter-spacing:0.05em;"></span>
+        <button class="btn-ghost" onclick="deleteSelected()" style="font-size:0.7rem;padding:0.35rem 0.9rem;border-color:rgba(231,76,60,0.4);color:#E74C3C;">🗑 Hapus yang Dipilih</button>
+        <button class="btn-ghost" onclick="clearSelection()" style="font-size:0.7rem;padding:0.35rem 0.9rem;">✕ Batal Pilih</button>
+      </div>
+      <div class="admin-table-wrap" id="participants-table-wrap" style="display:none;">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:36px;"><input type="checkbox" id="select-all" onclick="toggleSelectAll(this)" style="accent-color:#D4AF37;cursor:pointer;"></th>
+              <th>#</th>
+              <th>Nama</th>
+              <th>Cincin</th>
+              <th>K1</th>
+              <th>K2</th>
+              <th>K3</th>
+              <th>Waktu</th>
+            </tr>
+          </thead>
+          <tbody id="participants-tbody"></tbody>
+        </table>
+      </div>
+      <div id="no-participants" style="text-align:center;padding:2rem;color:var(--text-dim);font-style:italic;display:none;">
+        Belum ada peserta yang mengikuti kuis.
+      </div>
+    </div>
+
+    <!-- QUESTIONS TAB -->
+    <div id="tab-questions" class="admin-panel">
+      <div id="questions-loading" class="loading-rune"></div>
+      <div id="questions-editor" style="display:none;"></div>
+      <div style="margin-top:1rem;text-align:right;">
+        <button class="btn-primary" id="save-questions-btn" onclick="saveQuestions()" style="display:none;">
+          ✦ Simpan Semua Soal
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<button id="admin-trigger" onclick="showAdminLogin()">⚙</button>
+<div id="toast"></div>
+
+<script>
+// ===== SUPABASE CONFIG =====
+const SUPABASE_URL = 'https://gylfujfcnumbmpopfmoi.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd5bGZ1amZjbnVtYm1wb3BmbW9pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1NDc0MjIsImV4cCI6MjA5NDEyMzQyMn0.1hr6jzYhfOUCGCPs6BpCYL6id3LKoukTltG7vbT64kQ';
+const ADMIN_PASSWORD = 'arcavia2026';
+
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ===== DEFAULT QUESTIONS =====
+const defaultQuestions = [
+  {
+    kuil: 1,
+    order: 1,
+    question: "Di negara manakah panahan modern pertama kali dikembangkan sebagai olahraga kompetitif?",
+    options: ["Inggris", "Cina", "Persia", "Jepang"],
+    correct: 0
+  },
+  {
+    kuil: 1,
+    order: 2,
+    question: "Pada tahun berapa panahan pertama kali masuk sebagai cabang olahraga Olimpiade modern?",
+    options: ["1896", "1900", "1908", "1920"],
+    correct: 1
+  },
+  {
+    kuil: 2,
+    order: 1,
+    question: "Bagian panah yang berfungsi menstabilkan laju anak panah saat melayang di udara disebut?",
+    options: ["Nock", "Fletch (bulu)", "Point", "Shaft"],
+    correct: 1
+  },
+  {
+    kuil: 2,
+    order: 2,
+    question: "Posisi berdiri tegak menyamping menghadap target dalam teknik memanah disebut?",
+    options: ["Square stance", "Open stance", "Side stance", "Natural stance"],
+    correct: 0
+  },
+  {
+    kuil: 3,
+    order: 1,
+    question: "Jarak standar untuk kategori Recurve Senior putra dalam kompetisi outdoor World Archery adalah?",
+    options: ["50 meter", "60 meter", "70 meter", "90 meter"],
+    correct: 2
+  },
+  {
+    kuil: 3,
+    order: 2,
+    question: "Zona warna kuning (gold) pada target face panahan mendapat nilai berapa?",
+    options: ["8 dan 9", "9 dan 10", "10 dan X", "X saja"],
+    correct: 1
+  },
+  {
+    kuil: 3,
+    order: 3,
+    question: "Gerakan melepas tali busur secara terkontrol dan konsisten dalam teknik memanah disebut?",
+    options: ["Draw", "Anchor", "Release", "Follow-through"],
+    correct: 2
+  }
+];
+
+const kuilInfo = [
+  { name: "Kuil 1 : The History of Archery", subtitle: "Segel Pertama — Seal of Origins", badge: "k1", sealName: "Seal of Origins", desc: "Kamu telah membuka segel pertama. Sejarah panahan kini terukir dalam kisah perjalananmu.", rings: 2 },
+  { name: "Kuil 2 : What You Need to Know as an Archer", subtitle: "Segel Kedua — Seal of Knowledge", badge: "k2", sealName: "Seal of Knowledge", desc: "Segel pengetahuan terbuka. Ilmu teknis memanah telah menjadi bekalmu untuk medan perang.", rings: 2 },
+  { name: "Kuil 3 : The First Battlefield", subtitle: "Segel Ketiga — Seal of Valor", badge: "k3", sealName: "Seal of Valor", desc: "Tiga segel telah terbuka. Keberanian dan ketepatan telah kamu buktikan di medan pertama.", rings: 3 }
+];
+
+// ===== STATE =====
+let state = {
+  playerName: '',
+  currentKuil: 0,
+  currentQ: 0,
+  totalRings: 0,
+  kuilRings: [0, 0, 0],
+  answers: [],
+  questions: [],
+  sessionId: null,
+  answered: false
+};
+
+// ===== STARS =====
+(function initStars() {
+  const canvas = document.getElementById('starsCanvas');
+  const ctx = canvas.getContext('2d');
+  let stars = [];
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    stars = Array.from({length: 120}, () => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      r: Math.random() * 1.2 + 0.2,
+      alpha: Math.random() * 0.7 + 0.1,
+      speed: Math.random() * 0.003 + 0.001
+    }));
+  }
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    stars.forEach(s => {
+      s.alpha += Math.sin(Date.now() * s.speed) * 0.005;
+      s.alpha = Math.max(0.05, Math.min(0.9, s.alpha));
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(212,175,55,${s.alpha})`;
+      ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+  window.addEventListener('resize', resize);
+  resize(); draw();
+})();
+
+// ===== UTILS =====
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function toast(msg, duration = 2500) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), duration);
+}
+
+function renderRingsDisplay(containerId, total, earned) {
+  const wrap = document.getElementById(containerId);
+  wrap.innerHTML = '';
+  for (let i = 0; i < total; i++) {
+    const d = document.createElement('div');
+    d.className = 'ring-item' + (i < earned ? ' earned' : '');
+    d.textContent = i < earned ? '◆' : '◇';
+    wrap.appendChild(d);
+  }
+}
+
+// ===== LOAD QUESTIONS =====
+async function loadQuestions() {
+  try {
+    const { data, error } = await sb.from('questions').select('*').order('kuil').order('order');
+    if (error || !data || data.length === 0) {
+      state.questions = defaultQuestions;
+    } else {
+      state.questions = data.map(d => ({
+        kuil: d.kuil, order: d.order,
+        question: d.question,
+        options: typeof d.options === 'string' ? JSON.parse(d.options) : d.options,
+        correct: d.correct
+      }));
+    }
+  } catch(e) {
+    state.questions = defaultQuestions;
+  }
+}
+
+function getKuilQuestions(kuilNum) {
+  return state.questions.filter(q => q.kuil === kuilNum).sort((a,b) => a.order - b.order);
+}
+
+// ===== START JOURNEY =====
+async function startJourney() {
+  const name = document.getElementById('player-name').value.trim();
+  if (!name) { toast('Tuliskan namamu dulu, pemanah!'); return; }
+  state.playerName = name;
+  state.currentKuil = 0;
+  state.currentQ = 0;
+  state.totalRings = 0;
+  state.kuilRings = [0, 0, 0];
+  state.answers = [];
+  state.sessionId = 'sess_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
+
+  document.getElementById('start-btn').disabled = true;
+  await loadQuestions();
+  document.getElementById('start-btn').disabled = false;
+
+  showKuil(0);
+}
+
+// ===== SHOW KUIL =====
+function showKuil(kuilIdx) {
+  state.currentKuil = kuilIdx;
+  state.currentQ = 0;
+  state.answered = false;
+  const info = kuilInfo[kuilIdx];
+
+  const badge = document.getElementById('kuil-badge');
+  badge.textContent = `Kuil ${kuilIdx + 1}`;
+  badge.className = 'kuil-badge ' + info.badge;
+  document.getElementById('kuil-title').textContent = info.name;
+  document.getElementById('kuil-subtitle').textContent = info.subtitle;
+
+  renderRingsDisplay('rings-display', 7, state.totalRings);
+  showScreen('quiz-screen');
+  showQuestion();
+}
+
+// ===== SHOW QUESTION =====
+function showQuestion() {
+  const qs = getKuilQuestions(state.currentKuil + 1);
+  const q = qs[state.currentQ];
+  const totalQ = qs.length;
+  const overallIdx = state.questions.filter(x => x.kuil < state.currentKuil + 1).length + state.currentQ;
+  const totalOverall = state.questions.length;
+
+  document.getElementById('question-num').textContent = `PERTANYAAN ${state.currentQ + 1}`;
+  document.getElementById('question-text').textContent = q.question;
+  document.getElementById('q-progress-text').textContent = `Pertanyaan ${state.currentQ + 1} dari ${totalQ}`;
+  document.getElementById('rings-count').textContent = `${state.totalRings} / 7 Cincin`;
+
+  const pct = (overallIdx / totalOverall) * 100;
+  document.getElementById('progress-fill').style.width = pct + '%';
+
+  const wrap = document.getElementById('options-wrap');
+  wrap.innerHTML = '';
+  const labels = ['A', 'B', 'C', 'D'];
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.innerHTML = `<span class="opt-label">${labels[i]}</span>${opt}`;
+    btn.onclick = () => answerQuestion(i);
+    wrap.appendChild(btn);
+  });
+
+  document.getElementById('feedback-msg').textContent = '';
+  document.getElementById('feedback-msg').className = 'feedback-msg';
+  state.answered = false;
+
+  const card = document.getElementById('question-card');
+  card.style.animation = 'none';
+  card.offsetHeight;
+  card.style.animation = 'fadeSlideIn 0.4s ease';
+}
+
+// ===== ANSWER =====
+function answerQuestion(choiceIdx) {
+  if (state.answered) return;
+  state.answered = true;
+
+  const qs = getKuilQuestions(state.currentKuil + 1);
+  const q = qs[state.currentQ];
+  const correct = choiceIdx === q.correct;
+  const btns = document.querySelectorAll('.option-btn');
+  btns.forEach((btn, i) => {
+    btn.disabled = true;
+    if (i === q.correct) btn.classList.add('correct');
+    else if (i === choiceIdx && !correct) btn.classList.add('wrong');
+  });
+
+  const fb = document.getElementById('feedback-msg');
+  if (correct) {
+    state.totalRings++;
+    state.kuilRings[state.currentKuil]++;
+    renderRingsDisplay('rings-display', 7, state.totalRings);
+    document.getElementById('rings-count').textContent = `${state.totalRings} / 7 Cincin`;
+    fb.textContent = '✦ Benar! Cincin terukir untukmu.';
+    fb.className = 'feedback-msg correct';
+  } else {
+    document.getElementById('question-card').classList.add('shake');
+    setTimeout(() => document.getElementById('question-card').classList.remove('shake'), 400);
+    fb.textContent = '✦ Belum tepat. Teruslah belajar, pemanah.';
+    fb.className = 'feedback-msg wrong';
+  }
+
+  state.answers.push({ kuil: state.currentKuil + 1, q: state.currentQ + 1, choice: choiceIdx, correct });
+
+  setTimeout(() => {
+    if (state.currentQ + 1 < qs.length) {
+      state.currentQ++;
+      showQuestion();
+    } else {
+      showStageComplete();
+    }
+  }, 1400);
+}
+
+// ===== STAGE COMPLETE =====
+function showStageComplete() {
+  const info = kuilInfo[state.currentKuil];
+  const badge = document.getElementById('stage-badge');
+  badge.textContent = info.sealName;
+  badge.className = 'kuil-badge ' + info.badge;
+  document.getElementById('stage-title').textContent = info.sealName;
+  document.getElementById('stage-desc').textContent = info.desc;
+
+  const rings = document.getElementById('stage-rings');
+  rings.innerHTML = '';
+  for (let i = 0; i < info.rings; i++) {
+    const d = document.createElement('div');
+    const earned = i < state.kuilRings[state.currentKuil];
+    d.className = 'ring-item' + (earned ? ' earned' : '');
+    d.textContent = earned ? '◆' : '◇';
+    rings.appendChild(d);
+  }
+
+  const nextBtn = document.getElementById('next-stage-btn');
+  if (state.currentKuil === 2) {
+    nextBtn.textContent = '✦ Lihat Hasil Akhir ✦';
+  } else {
+    nextBtn.textContent = '✦ Lanjut ke Ujian Berikutnya ✦';
+  }
+
+  showScreen('stage-screen');
+}
+
+// ===== PROCEED NEXT =====
+async function proceedToNext() {
+  if (state.currentKuil === 2) {
+    await saveResult();
+    showFinal();
+  } else {
+    showKuil(state.currentKuil + 1);
+  }
+}
+
+// ===== SAVE RESULT =====
+async function saveResult() {
+  try {
+    await sb.from('participants').insert({
+      session_id: state.sessionId,
+      name: state.playerName,
+      total_rings: state.totalRings,
+      kuil1_rings: state.kuilRings[0],
+      kuil2_rings: state.kuilRings[1],
+      kuil3_rings: state.kuilRings[2],
+      answers: JSON.stringify(state.answers),
+      created_at: new Date().toISOString()
+    });
+  } catch(e) { /* silent fail */ }
+}
+
+// ===== FINAL =====
+function showFinal() {
+  document.getElementById('final-score').textContent = state.totalRings;
+  renderRingsDisplay('final-rings', 7, state.totalRings);
+
+  let msg = '';
+  if (state.totalRings === 7) msg = `Sempurna, ${state.playerName}! Semua tujuh cincin telah kamu rebut. Legenda sejati telah lahir.`;
+  else if (state.totalRings >= 5) msg = `Luar biasa, ${state.playerName}! ${state.totalRings} cincin dalam genggaman. Kamu telah membuktikan dirimu layak menjadi pemanah Arcavia.`;
+  else if (state.totalRings >= 3) msg = `Bagus, ${state.playerName}! ${state.totalRings} dari 7 cincin berhasil kamu kumpulkan. Masih ada ruang untuk terus berkembang.`;
+  else msg = `Perjalanan ini baru dimulai, ${state.playerName}. ${state.totalRings} cincin terkumpul. Ulangi lagi dan perkuat pengetahuanmu!`;
+
+  document.getElementById('final-msg').textContent = msg;
+  showScreen('final-screen');
+}
+
+function restartQuiz() {
+  document.getElementById('player-name').value = '';
+  showScreen('landing-screen');
+}
+
+// ===== ADMIN =====
+function showAdminLogin() { showScreen('admin-login-screen'); }
+
+function checkAdminPass() {
+  const pass = document.getElementById('admin-pass-input').value;
+  if (pass === ADMIN_PASSWORD) {
+    document.getElementById('admin-pass-input').value = '';
+    document.getElementById('admin-pass-err').textContent = '';
+    showScreen('admin-screen');
+    loadAdminData();
+  } else {
+    document.getElementById('admin-pass-err').textContent = 'Password salah.';
+  }
+}
+
+document.getElementById('admin-pass-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') checkAdminPass();
+});
+
+function switchAdminTab(tab) {
+  document.querySelectorAll('.admin-tab').forEach((t,i) => {
+    t.classList.toggle('active', ['participants','questions'][i] === tab);
+  });
+  document.getElementById('tab-participants').classList.toggle('active', tab === 'participants');
+  document.getElementById('tab-questions').classList.toggle('active', tab === 'questions');
+  if (tab === 'questions') loadQuestionsEditor();
+}
+
+async function loadAdminData() {
+  // Load participants
+  document.getElementById('participants-loading').style.display = 'block';
+  document.getElementById('participants-table-wrap').style.display = 'none';
+  document.getElementById('no-participants').style.display = 'none';
+
+  try {
+    const { data, error } = await sb.from('participants').select('*').order('created_at', { ascending: false });
+    document.getElementById('participants-loading').style.display = 'none';
+
+    if (error || !data || data.length === 0) {
+      document.getElementById('no-participants').style.display = 'block';
+      document.getElementById('stat-total').textContent = '0';
+      document.getElementById('stat-avg').textContent = '0';
+      document.getElementById('stat-perfect').textContent = '0';
+      document.getElementById('stat-today').textContent = '0';
+      return;
+    }
+
+    // Stats
+    const total = data.length;
+    const avg = (data.reduce((s,d) => s + (d.total_rings || 0), 0) / total).toFixed(1);
+    const perfect = data.filter(d => d.total_rings === 7).length;
+    const today = new Date().toDateString();
+    const todayCount = data.filter(d => new Date(d.created_at).toDateString() === today).length;
+
+    document.getElementById('stat-total').textContent = total;
+    document.getElementById('stat-avg').textContent = avg;
+    document.getElementById('stat-perfect').textContent = perfect;
+    document.getElementById('stat-today').textContent = todayCount;
+
+    // Table
+    const tbody = document.getElementById('participants-tbody');
+    tbody.innerHTML = '';
+    data.forEach((p, i) => {
+      const tr = document.createElement('tr');
+      tr.dataset.id = p.id;
+      const dt = new Date(p.created_at);
+      const timeStr = dt.toLocaleDateString('id-ID', {day:'2-digit',month:'short'}) + ' ' + dt.toLocaleTimeString('id-ID', {hour:'2-digit',minute:'2-digit'});
+      tr.innerHTML = `
+        <td><input type="checkbox" class="row-check" data-id="${p.id}" onchange="updateDeleteBar()" style="accent-color:#D4AF37;cursor:pointer;width:16px;height:16px;"></td>
+        <td style="color:var(--text-dim);font-size:0.8rem;">${i+1}</td>
+        <td style="font-weight:600;">${p.name || '—'}</td>
+        <td><span class="ring-pill">◆ ${p.total_rings || 0} / 7</span></td>
+        <td style="color:var(--text-dim);">${p.kuil1_rings ?? '—'}</td>
+        <td style="color:var(--text-dim);">${p.kuil2_rings ?? '—'}</td>
+        <td style="color:var(--text-dim);">${p.kuil3_rings ?? '—'}</td>
+        <td style="font-size:0.8rem;color:var(--text-dim);">${timeStr}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    document.getElementById('participants-table-wrap').style.display = 'block';
+  } catch(e) {
+    document.getElementById('participants-loading').style.display = 'none';
+    document.getElementById('no-participants').style.display = 'block';
+    document.getElementById('no-participants').textContent = 'Gagal memuat data. Pastikan tabel sudah dibuat.';
+  }
+}
+
+// ===== QUESTION EDITOR =====
+let editableQuestions = [];
+
+async function loadQuestionsEditor() {
+  document.getElementById('questions-loading').style.display = 'block';
+  document.getElementById('questions-editor').style.display = 'none';
+  document.getElementById('save-questions-btn').style.display = 'none';
+
+  try {
+    const { data, error } = await sb.from('questions').select('*').order('kuil').order('order');
+    editableQuestions = (data && data.length > 0)
+      ? data.map(d => ({...d, options: typeof d.options === 'string' ? JSON.parse(d.options) : d.options}))
+      : defaultQuestions.map((q,i) => ({...q, id: i+1}));
+  } catch(e) {
+    editableQuestions = defaultQuestions.map((q,i) => ({...q, id: i+1}));
+  }
+
+  renderQuestionsEditor();
+  document.getElementById('questions-loading').style.display = 'none';
+  document.getElementById('questions-editor').style.display = 'block';
+  document.getElementById('save-questions-btn').style.display = 'inline-block';
+}
+
+function renderQuestionsEditor() {
+  const wrap = document.getElementById('questions-editor');
+  wrap.innerHTML = '';
+  const kuilColors = ['k1','k2','k3'];
+
+  [1,2,3].forEach(kuilNum => {
+    const kuilQs = editableQuestions.filter(q => q.kuil === kuilNum);
+    const header = document.createElement('div');
+    header.innerHTML = `<div style="font-family:'Cinzel',serif;font-size:0.8rem;color:var(--text-dim);letter-spacing:0.1em;text-transform:uppercase;margin:1rem 0 0.5rem;">— Kuil ${kuilNum} —</div>`;
+    wrap.appendChild(header);
+
+    kuilQs.forEach((q, qi) => {
+      const idx = editableQuestions.indexOf(q);
+      const div = document.createElement('div');
+      div.className = 'q-editor';
+      div.innerHTML = `
+        <div class="q-editor-header">
+          <span><span class="kuil-badge ${kuilColors[kuilNum-1]}" style="font-size:0.6rem;padding:0.2rem 0.6rem;">Kuil ${kuilNum}</span> &nbsp; Soal ${qi+1}</span>
+        </div>
+        <input type="text" class="q-field" placeholder="Pertanyaan..." value="${escHtml(q.question)}" data-idx="${idx}" data-field="question">
+        <div class="q-options-grid">
+          ${q.options.map((opt, oi) => `<input type="text" class="q-field" placeholder="Pilihan ${['A','B','C','D'][oi]}..." value="${escHtml(opt)}" data-idx="${idx}" data-field="option" data-optidx="${oi}">`).join('')}
+        </div>
+        <div class="q-correct-wrap">
+          <span>Jawaban benar:</span>
+          <select data-idx="${idx}" data-field="correct">
+            ${q.options.map((opt,oi) => `<option value="${oi}" ${oi===q.correct?'selected':''}>${['A','B','C','D'][oi]}. ${opt.substring(0,30)}</option>`).join('')}
+          </select>
+        </div>
+      `;
+      wrap.appendChild(div);
+    });
+  });
+
+  // Bind events
+  wrap.querySelectorAll('[data-field]').forEach(el => {
+    el.addEventListener('input', function() {
+      const idx = parseInt(this.dataset.idx);
+      const field = this.dataset.field;
+      if (field === 'question') editableQuestions[idx].question = this.value;
+      else if (field === 'option') editableQuestions[idx].options[parseInt(this.dataset.optidx)] = this.value;
+      else if (field === 'correct') editableQuestions[idx].correct = parseInt(this.value);
+    });
+  });
+}
+
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+async function saveQuestions() {
+  const btn = document.getElementById('save-questions-btn');
+  btn.disabled = true;
+  btn.textContent = 'Menyimpan...';
+
+  try {
+    await sb.from('questions').delete().neq('kuil', 0);
+    const toInsert = editableQuestions.map(q => ({
+      kuil: q.kuil,
+      order: q.order,
+      question: q.question,
+      options: JSON.stringify(q.options),
+      correct: q.correct
+    }));
+    const { error } = await sb.from('questions').insert(toInsert);
+    if (error) throw error;
+    toast('✦ Soal berhasil disimpan!');
+    renderQuestionsEditor();
+  } catch(e) {
+    toast('Gagal menyimpan. Pastikan tabel "questions" sudah ada.');
+  }
+
+  btn.disabled = false;
+  btn.textContent = '✦ Simpan Semua Soal';
+}
+
+function toggleSelectAll(cb) {
+  document.querySelectorAll('.row-check').forEach(c => c.checked = cb.checked);
+  updateDeleteBar();
+}
+
+function updateDeleteBar() {
+  const checked = document.querySelectorAll('.row-check:checked');
+  const bar = document.getElementById('delete-bar');
+  const allCb = document.getElementById('select-all');
+  const all = document.querySelectorAll('.row-check');
+  if (checked.length > 0) {
+    bar.style.display = 'flex';
+    document.getElementById('selected-count').textContent = `${checked.length} peserta dipilih`;
+    if (allCb) allCb.indeterminate = checked.length > 0 && checked.length < all.length;
+    if (allCb && checked.length === all.length) { allCb.indeterminate = false; allCb.checked = true; }
+  } else {
+    bar.style.display = 'none';
+    if (allCb) { allCb.indeterminate = false; allCb.checked = false; }
+  }
+}
+
+function clearSelection() {
+  document.querySelectorAll('.row-check').forEach(c => c.checked = false);
+  const allCb = document.getElementById('select-all');
+  if (allCb) { allCb.checked = false; allCb.indeterminate = false; }
+  updateDeleteBar();
+}
+
+async function deleteSelected() {
+  const checked = [...document.querySelectorAll('.row-check:checked')];
+  if (checked.length === 0) return;
+  if (!confirm('Hapus ' + checked.length + ' data peserta yang dipilih?')) return;
+  const ids = checked.map(c => parseInt(c.dataset.id));
+  try {
+    const { error } = await sb.from('participants').delete().in('id', ids);
+    if (error) throw error;
+    toast('✦ ' + ids.length + ' data berhasil dihapus!');
+    loadAdminData();
+  } catch(e) {
+    toast('Gagal menghapus data.');
+  }
+}
+
+async function confirmDeleteAll() {
+  if (!confirm('Hapus SEMUA data peserta? Ini tidak bisa dibatalkan.')) return;
+  if (!confirm('Yakin? Semua data test akan dihapus permanen.')) return;
+  try {
+    const { error } = await sb.from('participants').delete().neq('id', 0);
+    if (error) throw error;
+    toast('✦ Semua data peserta berhasil dihapus!');
+    loadAdminData();
+  } catch(e) {
+    toast('Gagal menghapus data.');
+  }
+}
+
+// Keyboard shortcut for admin
+let adminSeq = '';
+document.addEventListener('keydown', e => {
+  adminSeq += e.key.toLowerCase();
+  if (adminSeq.length > 6) adminSeq = adminSeq.slice(-6);
+  if (adminSeq.endsWith('admin')) showAdminLogin();
+});
+</script>
+</body>
+</html>
