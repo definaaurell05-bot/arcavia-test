@@ -307,7 +307,7 @@ tr:hover td { background:rgba(212,175,55,0.03); }
 <!-- ADMIN LOGIN -->
 <div id="admin-login-screen" class="screen">
   <div class="admin-login-wrap">
-    <h2>⚜ Admin Arcavia</h2>
+    <h2>⚜ Admin Arcavia Test</h2>
     <input type="password" id="admin-pass-input" class="q-field" placeholder="Password admin..." style="text-align:center;">
     <div style="height:0.6rem;"></div>
     <button class="btn-primary" onclick="checkAdminPass()" style="width:100%;">Masuk</button>
@@ -320,7 +320,7 @@ tr:hover td { background:rgba(212,175,55,0.03); }
 <!-- ADMIN PANEL -->
 <div id="admin-screen" class="screen">
   <div class="admin-nav">
-    <div class="admin-nav-title">⚜ Admin Panel — Arcavia Quiz</div>
+    <div class="admin-nav-title">⚜ Admin Panel — Arcavia Test</div>
     <div style="display:flex;gap:0.4rem;flex-wrap:wrap;">
       <button class="btn-ghost" onclick="loadAdminData()" style="font-size:0.65rem;padding:0.35rem 0.7rem;">↻ Refresh</button>
       <button class="btn-ghost" onclick="exportExcel()" style="font-size:0.65rem;padding:0.35rem 0.7rem;border-color:rgba(46,204,113,0.3);color:#2ECC71;">↓ Export Excel</button>
@@ -771,7 +771,7 @@ async function exportExcel(){
 
     // Summary sheet
     const summary=[
-      ['REKAP ARCAVIA QUIZ — The Three Trials of the Seven Seals',''],
+      ['REKAP ARCAVIA TEST — The Three Trials of the Seven Seals',''],
       ['Tanggal Export', new Date().toLocaleString('id-ID')],
       ['',''],
       ['Total Peserta', data.length],
@@ -786,7 +786,7 @@ async function exportExcel(){
     ws2['!cols']=[{wch:30},{wch:20}];
     XLSX.utils.book_append_sheet(wb,'Ringkasan',ws2);
 
-    XLSX.writeFile(wb,'Arcavia_Quiz_Rekap_'+new Date().toLocaleDateString('id-ID').replace(/\//g,'-')+'.xlsx');
+    XLSX.writeFile(wb,'Arcavia_Test_Rekap_'+new Date().toLocaleDateString('id-ID').replace(/\//g,'-')+'.xlsx');
     toast('✦ Excel berhasil diunduh!');
   } catch(e){ toast('Gagal export Excel.'); console.error(e); }
 }
