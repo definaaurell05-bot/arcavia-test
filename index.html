@@ -383,6 +383,7 @@ tr:hover td { background:rgba(212,175,55,0.03); }
 const SUPABASE_URL = 'https://gylfujfcnumbmpopfmoi.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd5bGZ1amZjbnVtYm1wb3BmbW9pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1NDc0MjIsImV4cCI6MjA5NDEyMzQyMn0.1hr6jzYhfOUCGCPs6BpCYL6id3LKoukTltG7vbT64kQ';
 const ADMIN_PASSWORD = 'arcavia2026';
+const SHEETS_URL = 'https://script.google.com/macros/s/AKfycby9qWvWduQCu2E7rESnhJLeFBA3-R6PvhuHZysUoOh1MxteQgSH94ntnowuex9gRacexQ/exec';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ===== DEFAULT QUESTIONS (pretest = posttest) =====
@@ -655,18 +656,29 @@ async function showFinal(){
 
 // ===== SAVE =====
 async function saveResult(){
+  const payload = {
+    session_id:state.sessionId, name:state.playerName, origin:state.playerOrigin,
+    pretest_score:state.pretestScore, posttest_score:state.posttestScore,
+    delta:state.posttestScore-state.pretestScore,
+    kuil1_rings:state.kuilRings[0], kuil2_rings:state.kuilRings[1], kuil3_rings:state.kuilRings[2],
+    total_kuil_rings:state.kuilRings.reduce((a,b)=>a+b,0),
+    pretest_answers:JSON.stringify(state.pretestAnswers),
+    posttest_answers:JSON.stringify(state.posttestAnswers),
+    created_at:new Date().toISOString()
+  };
+  // Save to Supabase
   try {
-    await sb.from('participants').insert({
-      session_id:state.sessionId, name:state.playerName, origin:state.playerOrigin,
-      pretest_score:state.pretestScore, posttest_score:state.posttestScore,
-      delta:state.posttestScore-state.pretestScore,
-      kuil1_rings:state.kuilRings[0], kuil2_rings:state.kuilRings[1], kuil3_rings:state.kuilRings[2],
-      total_kuil_rings:state.kuilRings.reduce((a,b)=>a+b,0),
-      pretest_answers:JSON.stringify(state.pretestAnswers),
-      posttest_answers:JSON.stringify(state.posttestAnswers),
-      created_at:new Date().toISOString()
+    await sb.from('participants').insert(payload);
+  } catch(e){ console.error('Supabase save failed',e); }
+  // Save to Google Sheets
+  try {
+    await fetch(SHEETS_URL, {
+      method:'POST',
+      mode:'no-cors',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(payload)
     });
-  } catch(e){ console.error('Save failed',e); }
+  } catch(e){ console.error('Sheets save failed',e); }
 }
 
 function restartQuiz(){ document.getElementById('player-name').value=''; document.getElementById('player-origin').value=''; showScreen('landing-screen'); }
