@@ -6,831 +6,371 @@
 <title>Arcavia — The Three Trials of the Seven Seals</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 <style>
-  :root {
-    --gold: #D4AF37;
-    --gold-light: #F0D060;
-    --gold-dim: #8B7020;
-    --deep: #0A0612;
-    --deep2: #110920;
-    --deep3: #1A0F2E;
-    --purple: #3D1F6B;
-    --purple-light: #6B3FA0;
-    --seal1: #C0392B;
-    --seal2: #1A6B4A;
-    --seal3: #1A3A6B;
-    --text: #E8DCC8;
-    --text-dim: #9A8870;
-    --ring-color: #D4AF37;
-  }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --gold: #D4AF37; --gold-light: #F0D060; --gold-dim: #8B7020;
+  --deep: #0A0612; --deep2: #110920; --deep3: #1A0F2E;
+  --purple: #3D1F6B; --purple-light: #6B3FA0;
+  --text: #E8DCC8; --text-dim: #9A8870;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Crimson Text',serif; background:var(--deep); color:var(--text); min-height:100vh; overflow-x:hidden; }
 
-  body {
-    font-family: 'Crimson Text', serif;
-    background: var(--deep);
-    color: var(--text);
-    min-height: 100vh;
-    overflow-x: hidden;
-    cursor: default;
-  }
+#stars { position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0; }
 
-  /* STARFIELD */
-  #stars {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    pointer-events: none; z-index: 0;
-    background:
-      radial-gradient(ellipse at 20% 50%, rgba(61,31,107,0.3) 0%, transparent 60%),
-      radial-gradient(ellipse at 80% 20%, rgba(26,15,46,0.5) 0%, transparent 50%),
-      var(--deep);
-  }
-  #stars canvas { position: absolute; top: 0; left: 0; }
+.screen { position:relative; z-index:1; min-height:100vh; display:none; flex-direction:column; align-items:center; justify-content:center; padding:2rem 1rem; }
+.screen.active { display:flex; }
 
-  /* SCREENS */
-  .screen {
-    position: relative; z-index: 1;
-    min-height: 100vh;
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem 1rem;
-  }
-  .screen.active { display: flex; }
+/* LANDING */
+.landing-seal { width:160px; height:160px; border:2px solid var(--gold-dim); border-radius:50%; display:flex; align-items:center; justify-content:center; margin-bottom:1.5rem; animation:sealPulse 3s ease-in-out infinite; }
+.landing-seal svg { width:110px; height:110px; }
+@keyframes sealPulse {
+  0%,100% { box-shadow:0 0 20px rgba(212,175,55,0.2); }
+  50% { box-shadow:0 0 60px rgba(212,175,55,0.5); }
+}
+.title-main { font-family:'Cinzel Decorative',cursive; font-size:clamp(1.4rem,5vw,2.2rem); color:var(--gold); text-align:center; text-shadow:0 0 40px rgba(212,175,55,0.5); margin-bottom:0.3rem; }
+.title-sub { font-family:'Cinzel',serif; font-size:clamp(0.7rem,2vw,0.9rem); color:var(--text-dim); text-align:center; letter-spacing:0.15em; text-transform:uppercase; margin-bottom:0.4rem; }
+.tagline { font-style:italic; color:rgba(212,175,55,0.6); font-size:0.9rem; text-align:center; margin-bottom:2rem; max-width:380px; }
 
-  /* ===== LANDING ===== */
-  .landing-seal {
-    width: 180px; height: 180px;
-    border: 2px solid var(--gold-dim);
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    margin-bottom: 2rem;
-    position: relative;
-    animation: sealPulse 3s ease-in-out infinite;
-  }
-  .landing-seal::before {
-    content: '';
-    position: absolute; inset: -8px;
-    border-radius: 50%;
-    border: 1px solid rgba(212,175,55,0.2);
-    animation: sealPulse 3s ease-in-out infinite reverse;
-  }
-  .landing-seal svg { width: 120px; height: 120px; opacity: 0.9; }
-  @keyframes sealPulse {
-    0%,100% { box-shadow: 0 0 20px rgba(212,175,55,0.2), inset 0 0 20px rgba(212,175,55,0.05); }
-    50% { box-shadow: 0 0 60px rgba(212,175,55,0.4), inset 0 0 40px rgba(212,175,55,0.1); }
-  }
+.name-form { width:100%; max-width:340px; display:flex; flex-direction:column; gap:0.75rem; margin-bottom:1.5rem; }
+.name-form label { font-family:'Cinzel',serif; font-size:0.75rem; letter-spacing:0.1em; color:var(--text-dim); text-transform:uppercase; }
+.name-form input, .name-form select {
+  width:100%; background:rgba(212,175,55,0.05); border:1px solid var(--gold-dim); border-radius:4px;
+  padding:0.7rem 1rem; font-family:'Crimson Text',serif; font-size:1.05rem; color:var(--text);
+  outline:none; transition:border-color 0.3s,box-shadow 0.3s; text-align:center;
+}
+.name-form input:focus, .name-form select:focus { border-color:var(--gold); box-shadow:0 0 20px rgba(212,175,55,0.2); }
+.name-form input::placeholder { color:var(--text-dim); opacity:0.5; }
+.name-form select option { background:#1A0F2E; }
 
-  .title-main {
-    font-family: 'Cinzel Decorative', cursive;
-    font-size: clamp(1.4rem, 5vw, 2.2rem);
-    color: var(--gold);
-    text-align: center;
-    letter-spacing: 0.05em;
-    line-height: 1.3;
-    text-shadow: 0 0 40px rgba(212,175,55,0.5);
-    margin-bottom: 0.5rem;
-  }
-  .title-sub {
-    font-family: 'Cinzel', serif;
-    font-size: clamp(0.75rem, 2.5vw, 0.95rem);
-    color: var(--text-dim);
-    text-align: center;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    margin-bottom: 0.5rem;
-  }
-  .tagline {
-    font-style: italic;
-    color: rgba(212,175,55,0.6);
-    font-size: clamp(0.85rem, 2.5vw, 1rem);
-    text-align: center;
-    margin-bottom: 2.5rem;
-    max-width: 400px;
-  }
+.btn-primary {
+  font-family:'Cinzel',serif; font-size:0.85rem; letter-spacing:0.15em; text-transform:uppercase;
+  color:var(--deep); background:linear-gradient(135deg,var(--gold),var(--gold-light),var(--gold));
+  border:none; padding:0.9rem 2.5rem; border-radius:4px; cursor:pointer; transition:all 0.3s; position:relative; overflow:hidden;
+}
+.btn-primary:hover { box-shadow:0 0 30px rgba(212,175,55,0.5); transform:translateY(-2px); }
+.btn-primary:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+.btn-ghost { font-family:'Cinzel',serif; font-size:0.75rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-dim); background:transparent; border:1px solid rgba(212,175,55,0.2); padding:0.6rem 1.5rem; border-radius:4px; cursor:pointer; transition:all 0.3s; }
+.btn-ghost:hover { border-color:var(--gold-dim); color:var(--gold); }
 
-  /* NAME INPUT */
-  .name-form {
-    width: 100%; max-width: 360px;
-    display: flex; flex-direction: column; gap: 1rem;
-    margin-bottom: 2rem;
-  }
-  .name-form label {
-    font-family: 'Cinzel', serif;
-    font-size: 0.8rem;
-    letter-spacing: 0.1em;
-    color: var(--text-dim);
-    text-transform: uppercase;
-  }
-  .name-form input {
-    width: 100%;
-    background: rgba(212,175,55,0.05);
-    border: 1px solid var(--gold-dim);
-    border-radius: 4px;
-    padding: 0.75rem 1rem;
-    font-family: 'Crimson Text', serif;
-    font-size: 1.1rem;
-    color: var(--text);
-    outline: none;
-    transition: border-color 0.3s, box-shadow 0.3s;
-    text-align: center;
-  }
-  .name-form input:focus {
-    border-color: var(--gold);
-    box-shadow: 0 0 20px rgba(212,175,55,0.2);
-  }
-  .name-form input::placeholder { color: var(--text-dim); opacity: 0.5; }
+/* PHASE BANNER */
+.phase-banner {
+  display:inline-flex; align-items:center; gap:0.5rem;
+  font-family:'Cinzel',serif; font-size:0.7rem; letter-spacing:0.15em; text-transform:uppercase;
+  padding:0.4rem 1.2rem; border-radius:20px; margin-bottom:1rem;
+}
+.phase-banner.pretest { background:rgba(93,173,226,0.15); color:#5DADE2; border:1px solid rgba(93,173,226,0.3); }
+.phase-banner.kuil { background:rgba(212,175,55,0.1); color:var(--gold); border:1px solid rgba(212,175,55,0.2); }
+.phase-banner.posttest { background:rgba(46,204,113,0.15); color:#2ECC71; border:1px solid rgba(46,204,113,0.3); }
 
-  /* BUTTONS */
-  .btn-primary {
-    font-family: 'Cinzel', serif;
-    font-size: 0.85rem;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--deep);
-    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 50%, var(--gold) 100%);
-    border: none;
-    padding: 0.9rem 2.5rem;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.3s;
-    position: relative;
-    overflow: hidden;
-  }
-  .btn-primary::before {
-    content: '';
-    position: absolute; inset: 0;
-    background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.3) 50%, transparent 60%);
-    transform: translateX(-100%);
-    transition: transform 0.5s;
-  }
-  .btn-primary:hover::before { transform: translateX(100%); }
-  .btn-primary:hover { box-shadow: 0 0 30px rgba(212,175,55,0.5); transform: translateY(-2px); }
-  .btn-primary:active { transform: translateY(0); }
-  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+/* QUIZ */
+.kuil-header { text-align:center; margin-bottom:1.5rem; width:100%; max-width:580px; }
+.kuil-badge { display:inline-block; font-family:'Cinzel',serif; font-size:0.65rem; letter-spacing:0.2em; text-transform:uppercase; padding:0.25rem 0.9rem; border-radius:2px; margin-bottom:0.6rem; }
+.kuil-badge.k1 { background:rgba(192,57,43,0.2); color:#E74C3C; border:1px solid rgba(192,57,43,0.4); }
+.kuil-badge.k2 { background:rgba(26,107,74,0.2); color:#2ECC71; border:1px solid rgba(26,107,74,0.4); }
+.kuil-badge.k3 { background:rgba(26,58,107,0.2); color:#5DADE2; border:1px solid rgba(26,58,107,0.4); }
+.kuil-badge.pre { background:rgba(93,173,226,0.15); color:#5DADE2; border:1px solid rgba(93,173,226,0.3); }
+.kuil-badge.post { background:rgba(46,204,113,0.15); color:#2ECC71; border:1px solid rgba(46,204,113,0.3); }
+.kuil-title { font-family:'Cinzel Decorative',cursive; font-size:clamp(0.95rem,3.5vw,1.4rem); color:var(--gold); margin-bottom:0.2rem; }
+.kuil-subtitle { font-family:'Cinzel',serif; font-size:0.75rem; color:var(--text-dim); letter-spacing:0.08em; }
 
-  .btn-ghost {
-    font-family: 'Cinzel', serif;
-    font-size: 0.75rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--text-dim);
-    background: transparent;
-    border: 1px solid rgba(212,175,55,0.2);
-    padding: 0.6rem 1.5rem;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.3s;
-  }
-  .btn-ghost:hover { border-color: var(--gold-dim); color: var(--gold); }
+.progress-wrap { width:100%; max-width:500px; margin-bottom:1.5rem; }
+.progress-label { display:flex; justify-content:space-between; font-family:'Cinzel',serif; font-size:0.65rem; color:var(--text-dim); letter-spacing:0.1em; margin-bottom:0.4rem; }
+.progress-bar { height:3px; background:rgba(212,175,55,0.1); border-radius:2px; overflow:hidden; }
+.progress-fill { height:100%; background:linear-gradient(90deg,var(--gold-dim),var(--gold)); border-radius:2px; transition:width 0.5s ease; box-shadow:0 0 8px rgba(212,175,55,0.4); }
 
-  /* ===== QUIZ SCREEN ===== */
-  .kuil-header {
-    text-align: center;
-    margin-bottom: 2rem;
-    width: 100%; max-width: 600px;
-  }
-  .kuil-badge {
-    display: inline-block;
-    font-family: 'Cinzel', serif;
-    font-size: 0.7rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    padding: 0.3rem 1rem;
-    border-radius: 2px;
-    margin-bottom: 0.75rem;
-  }
-  .kuil-badge.k1 { background: rgba(192,57,43,0.2); color: #E74C3C; border: 1px solid rgba(192,57,43,0.4); }
-  .kuil-badge.k2 { background: rgba(26,107,74,0.2); color: #2ECC71; border: 1px solid rgba(26,107,74,0.4); }
-  .kuil-badge.k3 { background: rgba(26,58,107,0.2); color: #5DADE2; border: 1px solid rgba(26,58,107,0.4); }
+.rings-display { display:flex; gap:0.4rem; margin-bottom:1.5rem; flex-wrap:wrap; justify-content:center; }
+.ring-item { width:26px; height:26px; border-radius:50%; border:2px solid var(--gold-dim); display:flex; align-items:center; justify-content:center; transition:all 0.5s; font-size:0.75rem; }
+.ring-item.earned { background:radial-gradient(circle,var(--gold-light),var(--gold)); border-color:var(--gold); box-shadow:0 0 10px rgba(212,175,55,0.6); animation:ringEarn 0.5s ease; }
+@keyframes ringEarn { 0%{transform:scale(0) rotate(-180deg);} 70%{transform:scale(1.3);} 100%{transform:scale(1) rotate(0);} }
 
-  .kuil-title {
-    font-family: 'Cinzel Decorative', cursive;
-    font-size: clamp(1rem, 4vw, 1.5rem);
-    color: var(--gold);
-    margin-bottom: 0.25rem;
-  }
-  .kuil-subtitle {
-    font-family: 'Cinzel', serif;
-    font-size: 0.8rem;
-    color: var(--text-dim);
-    letter-spacing: 0.1em;
-  }
+.question-card { width:100%; max-width:540px; background:rgba(17,9,32,0.85); border:1px solid rgba(212,175,55,0.2); border-radius:8px; padding:1.5rem; margin-bottom:1rem; backdrop-filter:blur(10px); animation:fadeSlideIn 0.4s ease; }
+@keyframes fadeSlideIn { from{opacity:0;transform:translateY(20px);} to{opacity:1;transform:translateY(0);} }
+.question-card.shake { animation:shake 0.4s ease; }
+@keyframes shake { 0%,100%{transform:translateX(0);} 25%{transform:translateX(-8px);} 75%{transform:translateX(8px);} }
 
-  /* PROGRESS */
-  .progress-wrap {
-    width: 100%; max-width: 500px;
-    margin-bottom: 2rem;
-  }
-  .progress-label {
-    display: flex; justify-content: space-between;
-    font-family: 'Cinzel', serif;
-    font-size: 0.7rem;
-    color: var(--text-dim);
-    letter-spacing: 0.1em;
-    margin-bottom: 0.5rem;
-  }
-  .progress-bar {
-    height: 4px;
-    background: rgba(212,175,55,0.1);
-    border-radius: 2px;
-    overflow: hidden;
-  }
-  .progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--gold-dim), var(--gold));
-    border-radius: 2px;
-    transition: width 0.5s ease;
-    box-shadow: 0 0 8px rgba(212,175,55,0.5);
-  }
+.question-num { font-family:'Cinzel',serif; font-size:0.65rem; color:var(--text-dim); letter-spacing:0.15em; text-transform:uppercase; margin-bottom:0.6rem; }
+.question-text { font-size:clamp(1rem,3vw,1.15rem); line-height:1.6; color:var(--text); margin-bottom:1.25rem; }
 
-  /* RINGS DISPLAY */
-  .rings-display {
-    display: flex; gap: 0.5rem;
-    margin-bottom: 2rem;
-  }
-  .ring-item {
-    width: 28px; height: 28px;
-    border-radius: 50%;
-    border: 2px solid var(--gold-dim);
-    display: flex; align-items: center; justify-content: center;
-    transition: all 0.5s;
-    font-size: 0.8rem;
-  }
-  .ring-item.earned {
-    background: radial-gradient(circle, var(--gold-light), var(--gold));
-    border-color: var(--gold);
-    box-shadow: 0 0 12px rgba(212,175,55,0.6);
-    animation: ringEarn 0.5s ease;
-  }
-  @keyframes ringEarn {
-    0% { transform: scale(0) rotate(-180deg); }
-    70% { transform: scale(1.3) rotate(10deg); }
-    100% { transform: scale(1) rotate(0); }
-  }
+.options { display:flex; flex-direction:column; gap:0.5rem; }
+.option-btn { width:100%; background:rgba(212,175,55,0.03); border:1px solid rgba(212,175,55,0.15); border-radius:6px; padding:0.75rem 1rem; text-align:left; font-family:'Crimson Text',serif; font-size:1rem; color:var(--text); cursor:pointer; transition:all 0.25s; display:flex; align-items:center; gap:0.7rem; }
+.option-btn:hover:not(:disabled) { background:rgba(212,175,55,0.08); border-color:var(--gold-dim); transform:translateX(4px); }
+.option-btn .opt-label { font-family:'Cinzel',serif; font-size:0.65rem; color:var(--text-dim); min-width:16px; }
+.option-btn.correct { background:rgba(46,204,113,0.15); border-color:#2ECC71; color:#A8F0C8; box-shadow:0 0 12px rgba(46,204,113,0.2); }
+.option-btn.wrong { background:rgba(231,76,60,0.15); border-color:#E74C3C; color:#F0A8A8; }
+.option-btn:disabled { cursor:default; }
 
-  /* QUESTION CARD */
-  .question-card {
-    width: 100%; max-width: 560px;
-    background: rgba(17,9,32,0.8);
-    border: 1px solid rgba(212,175,55,0.2);
-    border-radius: 8px;
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
-    backdrop-filter: blur(10px);
-    animation: fadeSlideIn 0.4s ease;
-  }
-  @keyframes fadeSlideIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  .question-card.shake {
-    animation: shake 0.4s ease;
-  }
-  @keyframes shake {
-    0%,100% { transform: translateX(0); }
-    20% { transform: translateX(-8px); }
-    40% { transform: translateX(8px); }
-    60% { transform: translateX(-5px); }
-    80% { transform: translateX(5px); }
-  }
+.feedback-msg { text-align:center; font-size:1.05rem; margin:0.75rem 0; min-height:1.4rem; font-style:italic; }
+.feedback-msg.correct { color:#2ECC71; }
+.feedback-msg.wrong { color:#E74C3C; }
 
-  .question-num {
-    font-family: 'Cinzel', serif;
-    font-size: 0.7rem;
-    color: var(--text-dim);
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    margin-bottom: 0.75rem;
-  }
-  .question-text {
-    font-size: clamp(1rem, 3vw, 1.2rem);
-    line-height: 1.6;
-    color: var(--text);
-    margin-bottom: 1.5rem;
-  }
+/* STAGE COMPLETE */
+.stage-complete { text-align:center; max-width:460px; }
+.seal-icon { width:110px; height:110px; margin:0 auto 1.25rem; animation:sealReveal 1s ease forwards; }
+@keyframes sealReveal { 0%{transform:scale(0) rotate(-90deg);opacity:0;} 60%{transform:scale(1.1);opacity:1;} 100%{transform:scale(1) rotate(0);} }
+.seal-title { font-family:'Cinzel Decorative',cursive; font-size:clamp(1rem,4vw,1.3rem); color:var(--gold); margin-bottom:0.5rem; }
+.seal-desc { color:var(--text-dim); font-style:italic; margin-bottom:1.5rem; line-height:1.6; font-size:0.95rem; }
 
-  /* OPTIONS */
-  .options { display: flex; flex-direction: column; gap: 0.6rem; }
-  .option-btn {
-    width: 100%;
-    background: rgba(212,175,55,0.03);
-    border: 1px solid rgba(212,175,55,0.15);
-    border-radius: 6px;
-    padding: 0.8rem 1rem;
-    text-align: left;
-    font-family: 'Crimson Text', serif;
-    font-size: 1rem;
-    color: var(--text);
-    cursor: pointer;
-    transition: all 0.25s;
-    display: flex; align-items: center; gap: 0.75rem;
-  }
-  .option-btn:hover:not(:disabled) {
-    background: rgba(212,175,55,0.08);
-    border-color: var(--gold-dim);
-    transform: translateX(4px);
-  }
-  .option-btn .opt-label {
-    font-family: 'Cinzel', serif;
-    font-size: 0.7rem;
-    color: var(--text-dim);
-    min-width: 18px;
-  }
-  .option-btn.correct {
-    background: rgba(46,204,113,0.15);
-    border-color: #2ECC71;
-    color: #A8F0C8;
-    box-shadow: 0 0 15px rgba(46,204,113,0.2);
-  }
-  .option-btn.wrong {
-    background: rgba(231,76,60,0.15);
-    border-color: #E74C3C;
-    color: #F0A8A8;
-  }
-  .option-btn:disabled { cursor: default; }
+/* SCORE COMPARE */
+.score-compare { display:flex; gap:1.5rem; justify-content:center; margin:1.5rem 0; flex-wrap:wrap; }
+.score-box { background:rgba(17,9,32,0.8); border:1px solid rgba(212,175,55,0.2); border-radius:8px; padding:1rem 1.5rem; text-align:center; min-width:120px; }
+.score-box .score-num { font-family:'Cinzel Decorative',cursive; font-size:2.5rem; line-height:1; }
+.score-box .score-lbl { font-family:'Cinzel',serif; font-size:0.65rem; letter-spacing:0.1em; color:var(--text-dim); text-transform:uppercase; margin-top:0.3rem; }
+.score-box.pre .score-num { color:#5DADE2; }
+.score-box.post .score-num { color:#2ECC71; }
+.score-box.delta .score-num { color:var(--gold); }
+.improvement-msg { font-family:'Cinzel',serif; font-size:0.85rem; letter-spacing:0.05em; margin-bottom:1.5rem; }
+.improvement-msg.up { color:#2ECC71; }
+.improvement-msg.same { color:var(--text-dim); }
+.improvement-msg.down { color:#E74C3C; }
 
-  /* FEEDBACK */
-  .feedback-msg {
-    text-align: center;
-    font-size: 1.1rem;
-    margin: 1rem 0;
-    min-height: 1.5rem;
-    font-style: italic;
-    transition: all 0.3s;
-  }
-  .feedback-msg.correct { color: #2ECC71; }
-  .feedback-msg.wrong { color: #E74C3C; }
+.final-score-big { font-family:'Cinzel Decorative',cursive; font-size:clamp(2.5rem,8vw,4rem); color:var(--gold); text-shadow:0 0 40px rgba(212,175,55,0.6); line-height:1; margin:0.75rem 0 0.25rem; }
+.final-label { font-family:'Cinzel',serif; font-size:0.75rem; letter-spacing:0.2em; color:var(--text-dim); text-transform:uppercase; margin-bottom:1rem; }
+.final-msg { font-size:1.05rem; font-style:italic; color:var(--text-dim); text-align:center; max-width:360px; line-height:1.7; margin-bottom:1.5rem; }
 
-  /* ===== STAGE COMPLETE ===== */
-  .stage-complete {
-    text-align: center;
-    max-width: 480px;
-  }
-  .seal-icon {
-    width: 120px; height: 120px;
-    margin: 0 auto 1.5rem;
-    animation: sealReveal 1s ease forwards;
-  }
-  @keyframes sealReveal {
-    0% { transform: scale(0) rotate(-90deg); opacity: 0; }
-    60% { transform: scale(1.1) rotate(5deg); opacity: 1; }
-    100% { transform: scale(1) rotate(0); }
-  }
-  .seal-title {
-    font-family: 'Cinzel Decorative', cursive;
-    font-size: clamp(1rem, 4vw, 1.4rem);
-    color: var(--gold);
-    margin-bottom: 0.5rem;
-  }
-  .seal-desc {
-    color: var(--text-dim);
-    font-style: italic;
-    margin-bottom: 1.5rem;
-    line-height: 1.6;
-  }
-  .rings-earned-display {
-    display: flex; gap: 0.5rem; justify-content: center;
-    margin-bottom: 2rem;
-  }
+/* ADMIN */
+#admin-screen { background:#0F0F1A; align-items:stretch; justify-content:flex-start; padding:0; }
+.admin-nav { background:#1A1A2E; border-bottom:1px solid rgba(212,175,55,0.2); padding:0.85rem 1.25rem; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.5rem; }
+.admin-nav-title { font-family:'Cinzel',serif; font-size:0.85rem; color:var(--gold); letter-spacing:0.08em; }
+.admin-body { padding:1.25rem; max-width:960px; margin:0 auto; width:100%; }
+.admin-tabs { display:flex; gap:0.4rem; margin-bottom:1.25rem; border-bottom:1px solid rgba(212,175,55,0.15); padding-bottom:0.5rem; flex-wrap:wrap; }
+.admin-tab { font-family:'Cinzel',serif; font-size:0.7rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-dim); background:transparent; border:none; padding:0.45rem 0.9rem; cursor:pointer; border-radius:4px 4px 0 0; transition:all 0.2s; }
+.admin-tab.active { color:var(--gold); background:rgba(212,175,55,0.08); }
+.admin-panel { display:none; }
+.admin-panel.active { display:block; }
 
-  /* ===== FINAL SCREEN ===== */
-  .final-score {
-    font-family: 'Cinzel Decorative', cursive;
-    font-size: clamp(3rem, 10vw, 5rem);
-    color: var(--gold);
-    text-shadow: 0 0 40px rgba(212,175,55,0.6);
-    line-height: 1;
-    margin: 1rem 0 0.5rem;
-  }
-  .final-label {
-    font-family: 'Cinzel', serif;
-    font-size: 0.8rem;
-    letter-spacing: 0.2em;
-    color: var(--text-dim);
-    text-transform: uppercase;
-    margin-bottom: 1.5rem;
-  }
-  .final-msg {
-    font-size: 1.15rem;
-    font-style: italic;
-    color: var(--text-dim);
-    text-align: center;
-    max-width: 380px;
-    line-height: 1.7;
-    margin-bottom: 2rem;
-  }
+.stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:0.75rem; margin-bottom:1.25rem; }
+.stat-card { background:#1A1A2E; border:1px solid rgba(212,175,55,0.15); border-radius:8px; padding:0.85rem; text-align:center; }
+.stat-num { font-family:'Cinzel Decorative',cursive; font-size:1.8rem; color:var(--gold); line-height:1; }
+.stat-lbl { font-family:'Cinzel',serif; font-size:0.6rem; color:var(--text-dim); letter-spacing:0.08em; text-transform:uppercase; margin-top:0.25rem; }
 
-  /* ===== ADMIN PANEL ===== */
-  #admin-screen {
-    background: #0F0F1A;
-    align-items: stretch;
-    justify-content: flex-start;
-    padding: 0;
-  }
-  .admin-nav {
-    background: #1A1A2E;
-    border-bottom: 1px solid rgba(212,175,55,0.2);
-    padding: 1rem 1.5rem;
-    display: flex; align-items: center; justify-content: space-between;
-    flex-wrap: wrap; gap: 0.5rem;
-  }
-  .admin-nav-title {
-    font-family: 'Cinzel', serif;
-    font-size: 0.85rem;
-    color: var(--gold);
-    letter-spacing: 0.1em;
-  }
-  .admin-body { padding: 1.5rem; max-width: 900px; margin: 0 auto; width: 100%; }
+.admin-table-wrap { overflow-x:auto; border-radius:8px; border:1px solid rgba(212,175,55,0.15); }
+table { width:100%; border-collapse:collapse; font-size:0.85rem; }
+th { background:#1A1A2E; font-family:'Cinzel',serif; font-size:0.6rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-dim); padding:0.65rem 0.85rem; text-align:left; border-bottom:1px solid rgba(212,175,55,0.15); white-space:nowrap; }
+td { padding:0.55rem 0.85rem; border-bottom:1px solid rgba(212,175,55,0.06); color:var(--text); vertical-align:middle; }
+tr:last-child td { border-bottom:none; }
+tr:hover td { background:rgba(212,175,55,0.03); }
 
-  .admin-tabs {
-    display: flex; gap: 0.5rem; margin-bottom: 1.5rem;
-    border-bottom: 1px solid rgba(212,175,55,0.15);
-    padding-bottom: 0.5rem;
-  }
-  .admin-tab {
-    font-family: 'Cinzel', serif;
-    font-size: 0.75rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--text-dim);
-    background: transparent;
-    border: none;
-    padding: 0.5rem 1rem;
-    cursor: pointer;
-    border-radius: 4px 4px 0 0;
-    transition: all 0.2s;
-  }
-  .admin-tab.active { color: var(--gold); background: rgba(212,175,55,0.08); }
-  .admin-tab:hover:not(.active) { color: var(--text); }
+.ring-pill { display:inline-flex; align-items:center; gap:0.25rem; background:rgba(212,175,55,0.1); border:1px solid rgba(212,175,55,0.3); border-radius:20px; padding:0.1rem 0.5rem; font-size:0.75rem; color:var(--gold); white-space:nowrap; }
+.delta-pill { display:inline-flex; align-items:center; gap:0.2rem; border-radius:20px; padding:0.1rem 0.5rem; font-size:0.75rem; white-space:nowrap; }
+.delta-pill.up { background:rgba(46,204,113,0.1); border:1px solid rgba(46,204,113,0.3); color:#2ECC71; }
+.delta-pill.same { background:rgba(150,150,150,0.1); border:1px solid rgba(150,150,150,0.2); color:var(--text-dim); }
+.delta-pill.down { background:rgba(231,76,60,0.1); border:1px solid rgba(231,76,60,0.3); color:#E74C3C; }
 
-  .admin-panel { display: none; }
-  .admin-panel.active { display: block; }
+/* QUESTION EDITOR */
+.q-editor { background:#1A1A2E; border:1px solid rgba(212,175,55,0.15); border-radius:8px; padding:1rem; margin-bottom:0.75rem; }
+.q-editor-header { font-family:'Cinzel',serif; font-size:0.7rem; color:var(--gold); letter-spacing:0.08em; margin-bottom:0.75rem; }
+.q-field { width:100%; background:rgba(0,0,0,0.3); border:1px solid rgba(212,175,55,0.15); border-radius:4px; padding:0.5rem 0.7rem; font-family:'Crimson Text',serif; font-size:0.9rem; color:var(--text); outline:none; margin-bottom:0.4rem; transition:border-color 0.2s; }
+.q-field:focus { border-color:var(--gold-dim); }
+.q-options-grid { display:grid; grid-template-columns:1fr 1fr; gap:0.4rem; margin-bottom:0.4rem; }
+.q-correct-wrap { display:flex; align-items:center; gap:0.5rem; font-size:0.8rem; color:var(--text-dim); }
+.q-correct-wrap select { background:rgba(0,0,0,0.3); border:1px solid rgba(212,175,55,0.15); border-radius:4px; padding:0.3rem 0.5rem; color:var(--text); font-family:'Crimson Text',serif; font-size:0.85rem; outline:none; }
 
-  /* STATS CARDS */
-  .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 1rem; margin-bottom: 1.5rem;
-  }
-  .stat-card {
-    background: #1A1A2E;
-    border: 1px solid rgba(212,175,55,0.15);
-    border-radius: 8px;
-    padding: 1rem;
-    text-align: center;
-  }
-  .stat-num {
-    font-family: 'Cinzel Decorative', cursive;
-    font-size: 2rem;
-    color: var(--gold);
-    line-height: 1;
-  }
-  .stat-lbl {
-    font-family: 'Cinzel', serif;
-    font-size: 0.65rem;
-    color: var(--text-dim);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    margin-top: 0.3rem;
-  }
+/* ADMIN LOGIN */
+.admin-login-wrap { max-width:320px; width:100%; background:rgba(17,9,32,0.9); border:1px solid rgba(212,175,55,0.2); border-radius:8px; padding:2rem; text-align:center; }
+.admin-login-wrap h2 { font-family:'Cinzel',serif; font-size:1rem; color:var(--gold); margin-bottom:1.25rem; letter-spacing:0.1em; }
 
-  /* TABLE */
-  .admin-table-wrap { overflow-x: auto; border-radius: 8px; border: 1px solid rgba(212,175,55,0.15); }
-  table {
-    width: 100%; border-collapse: collapse;
-    font-size: 0.9rem;
-  }
-  th {
-    background: #1A1A2E;
-    font-family: 'Cinzel', serif;
-    font-size: 0.65rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--text-dim);
-    padding: 0.75rem 1rem;
-    text-align: left;
-    border-bottom: 1px solid rgba(212,175,55,0.15);
-  }
-  td {
-    padding: 0.65rem 1rem;
-    border-bottom: 1px solid rgba(212,175,55,0.06);
-    color: var(--text);
-    vertical-align: top;
-  }
-  tr:last-child td { border-bottom: none; }
-  tr:hover td { background: rgba(212,175,55,0.03); }
+/* DELETE BAR */
+.delete-bar { display:none; margin-bottom:0.75rem; align-items:center; gap:0.75rem; flex-wrap:wrap; padding:0.5rem; background:rgba(231,76,60,0.05); border:1px solid rgba(231,76,60,0.2); border-radius:6px; }
+.delete-bar.visible { display:flex; }
 
-  .ring-pill {
-    display: inline-flex; align-items: center; gap: 0.3rem;
-    background: rgba(212,175,55,0.1);
-    border: 1px solid rgba(212,175,55,0.3);
-    border-radius: 20px;
-    padding: 0.15rem 0.6rem;
-    font-size: 0.8rem;
-    color: var(--gold);
-  }
+/* TOAST */
+#toast { position:fixed; bottom:2rem; left:50%; transform:translateX(-50%); background:rgba(17,9,32,0.95); border:1px solid var(--gold-dim); border-radius:6px; padding:0.7rem 1.4rem; font-family:'Cinzel',serif; font-size:0.75rem; color:var(--gold); letter-spacing:0.05em; z-index:1000; opacity:0; transition:opacity 0.3s; pointer-events:none; white-space:nowrap; }
+#toast.show { opacity:1; }
 
-  /* QUESTION EDITOR */
-  .q-editor {
-    background: #1A1A2E;
-    border: 1px solid rgba(212,175,55,0.15);
-    border-radius: 8px;
-    padding: 1.25rem;
-    margin-bottom: 1rem;
-  }
-  .q-editor-header {
-    font-family: 'Cinzel', serif;
-    font-size: 0.75rem;
-    color: var(--gold);
-    letter-spacing: 0.1em;
-    margin-bottom: 1rem;
-    display: flex; justify-content: space-between; align-items: center;
-  }
-  .q-field {
-    width: 100%;
-    background: rgba(0,0,0,0.3);
-    border: 1px solid rgba(212,175,55,0.15);
-    border-radius: 4px;
-    padding: 0.6rem 0.75rem;
-    font-family: 'Crimson Text', serif;
-    font-size: 0.95rem;
-    color: var(--text);
-    outline: none;
-    margin-bottom: 0.5rem;
-    transition: border-color 0.2s;
-  }
-  .q-field:focus { border-color: var(--gold-dim); }
-  .q-options-grid {
-    display: grid; grid-template-columns: 1fr 1fr;
-    gap: 0.5rem; margin-bottom: 0.5rem;
-  }
-  .q-correct-wrap {
-    display: flex; align-items: center; gap: 0.5rem;
-    font-size: 0.85rem; color: var(--text-dim); margin-top: 0.25rem;
-  }
-  .q-correct-wrap select {
-    background: rgba(0,0,0,0.3);
-    border: 1px solid rgba(212,175,55,0.15);
-    border-radius: 4px;
-    padding: 0.35rem 0.5rem;
-    color: var(--text);
-    font-family: 'Crimson Text', serif;
-    font-size: 0.9rem;
-    outline: none;
-  }
+.loading-rune { width:40px; height:40px; border:2px solid rgba(212,175,55,0.1); border-top-color:var(--gold); border-radius:50%; animation:spin 1s linear infinite; margin:2rem auto; }
+@keyframes spin { to{transform:rotate(360deg);} }
 
-  /* ADMIN LOGIN */
-  .admin-login-wrap {
-    max-width: 340px; width: 100%;
-    background: rgba(17,9,32,0.9);
-    border: 1px solid rgba(212,175,55,0.2);
-    border-radius: 8px;
-    padding: 2rem;
-    text-align: center;
-  }
-  .admin-login-wrap h2 {
-    font-family: 'Cinzel', serif;
-    font-size: 1rem;
-    color: var(--gold);
-    margin-bottom: 1.5rem;
-    letter-spacing: 0.1em;
-  }
+#admin-trigger { position:fixed; bottom:1rem; right:1rem; background:transparent; border:none; color:rgba(212,175,55,0.12); font-size:0.55rem; cursor:pointer; font-family:'Cinzel',serif; z-index:100; transition:color 0.3s; }
+#admin-trigger:hover { color:rgba(212,175,55,0.35); }
 
-  /* DIVIDER */
-  .ornamented-divider {
-    display: flex; align-items: center; gap: 1rem;
-    margin: 1.5rem 0; color: var(--gold-dim);
-    font-size: 1rem;
-  }
-  .ornamented-divider::before, .ornamented-divider::after {
-    content: ''; flex: 1;
-    height: 1px; background: rgba(212,175,55,0.2);
-  }
+.ornamented-divider { display:flex; align-items:center; gap:1rem; margin:1rem 0; color:var(--gold-dim); }
+.ornamented-divider::before, .ornamented-divider::after { content:''; flex:1; height:1px; background:rgba(212,175,55,0.15); }
 
-  /* TOAST */
-  #toast {
-    position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%);
-    background: rgba(17,9,32,0.95);
-    border: 1px solid var(--gold-dim);
-    border-radius: 6px;
-    padding: 0.75rem 1.5rem;
-    font-family: 'Cinzel', serif;
-    font-size: 0.8rem;
-    color: var(--gold);
-    letter-spacing: 0.05em;
-    z-index: 1000;
-    opacity: 0; transition: opacity 0.3s;
-    pointer-events: none; white-space: nowrap;
-  }
-  #toast.show { opacity: 1; }
-
-  /* LOADING */
-  .loading-rune {
-    width: 48px; height: 48px;
-    border: 2px solid rgba(212,175,55,0.1);
-    border-top-color: var(--gold);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin: 2rem auto;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  /* ADMIN TRIGGER */
-  #admin-trigger {
-    position: fixed; bottom: 1rem; right: 1rem;
-    background: transparent; border: none;
-    color: rgba(212,175,55,0.15);
-    font-size: 0.6rem; cursor: pointer;
-    font-family: 'Cinzel', serif;
-    letter-spacing: 0.1em;
-    z-index: 100;
-    transition: color 0.3s;
-  }
-  #admin-trigger:hover { color: rgba(212,175,55,0.4); }
-
-  .separator { height: 1px; background: rgba(212,175,55,0.1); margin: 1rem 0; }
-
-  @media (max-width: 480px) {
-    .q-options-grid { grid-template-columns: 1fr; }
-    .admin-body { padding: 1rem; }
-  }
+@media(max-width:480px) { .q-options-grid{grid-template-columns:1fr;} .admin-body{padding:0.85rem;} .score-compare{gap:0.75rem;} }
 </style>
 </head>
 <body>
+<canvas id="stars" style="position:fixed;top:0;left:0;z-index:0;pointer-events:none;"></canvas>
 
-<div id="stars"><canvas id="starsCanvas"></canvas></div>
-
-<!-- ===== LANDING ===== -->
+<!-- LANDING -->
 <div id="landing-screen" class="screen active">
   <div class="landing-seal">
-    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg viewBox="0 0 100 100" fill="none">
       <polygon points="50,5 61,35 95,35 68,57 79,91 50,70 21,91 32,57 5,35 39,35" fill="none" stroke="#D4AF37" stroke-width="1.5" opacity="0.6"/>
       <circle cx="50" cy="50" r="22" fill="none" stroke="#D4AF37" stroke-width="1" opacity="0.8"/>
-      <path d="M50 28 L50 15 M50 72 L50 85 M28 50 L15 50 M72 50 L85 50" stroke="#D4AF37" stroke-width="1" opacity="0.4"/>
       <circle cx="50" cy="50" r="4" fill="#D4AF37" opacity="0.9"/>
       <path d="M50 35 L55 47 L50 58 L45 47 Z" fill="#D4AF37" opacity="0.5"/>
     </svg>
   </div>
-
   <div class="title-main">Arcavia</div>
   <div class="title-sub">The Three Trials of the Seven Seals</div>
   <div class="tagline">"Lining the new path of journey through written arrows"</div>
-
   <div class="name-form">
-    <label for="player-name">Nama Pemanah</label>
+    <label>Nama Pemanah</label>
     <input type="text" id="player-name" placeholder="Tulis namamu di sini..." maxlength="40" autocomplete="off">
+    <label>Kategori Peserta</label>
+    <select id="player-origin">
+      <option value="" disabled selected>Pilih kategori...</option>
+      <option value="ITB">ITB</option>
+      <option value="Umum">Umum</option>
+    </select>
   </div>
-
-  <button class="btn-primary" id="start-btn" onclick="startJourney()">
-    ✦ Mulai Perjalanan ✦
-  </button>
-
-  <div style="margin-top: 1.5rem; font-size: 0.85rem; color: var(--text-dim); text-align: center; font-style: italic; max-width: 320px; line-height: 1.6;">
-    Tiga segel menanti. Tujuh cincin tersembunyi.<br>Tuliskan legenda-mu melalui anak panah pengetahuan.
+  <button class="btn-primary" id="start-btn" onclick="startJourney()">✦ Mulai Perjalanan ✦</button>
+  <div style="margin-top:1.25rem;font-size:0.85rem;color:var(--text-dim);text-align:center;font-style:italic;max-width:300px;line-height:1.6;">
+    Tiga segel menanti. Tujuh cincin tersembunyi.<br>Tuliskan legendamu melalui anak panah pengetahuan.
   </div>
 </div>
 
-<!-- ===== QUIZ SCREEN ===== -->
+<!-- QUIZ SCREEN (pretest, kuil, posttest) -->
 <div id="quiz-screen" class="screen">
   <div class="kuil-header">
-    <div class="kuil-badge" id="kuil-badge">Kuil 1</div>
-    <div class="kuil-title" id="kuil-title">The History of Archery</div>
-    <div class="kuil-subtitle" id="kuil-subtitle">Segel Pertama — Seal of Origins</div>
+    <div class="phase-banner" id="phase-banner">Pretest</div>
+    <div class="kuil-badge" id="kuil-badge">Pretest</div>
+    <div class="kuil-title" id="kuil-title">Uji Pengetahuan Awal</div>
+    <div class="kuil-subtitle" id="kuil-subtitle">Jawab sesuai pengetahuanmu saat ini</div>
   </div>
-
   <div class="progress-wrap">
     <div class="progress-label">
-      <span id="q-progress-text">Pertanyaan 1 dari 2</span>
-      <span id="rings-count">0 / 7 Cincin</span>
+      <span id="q-progress-text">Pertanyaan 1 dari 7</span>
+      <span id="rings-count">0 / 7</span>
     </div>
     <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
   </div>
-
   <div class="rings-display" id="rings-display"></div>
-
   <div class="question-card" id="question-card">
     <div class="question-num" id="question-num">PERTANYAAN 1</div>
     <div class="question-text" id="question-text">Loading...</div>
     <div class="options" id="options-wrap"></div>
   </div>
-
   <div class="feedback-msg" id="feedback-msg"></div>
 </div>
 
-<!-- ===== STAGE COMPLETE ===== -->
+<!-- STAGE COMPLETE -->
 <div id="stage-screen" class="screen">
   <div class="stage-complete">
-    <div class="seal-icon" id="seal-icon">
-      <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <div class="seal-icon">
+      <svg viewBox="0 0 120 120" fill="none">
         <circle cx="60" cy="60" r="55" stroke="#D4AF37" stroke-width="1.5" opacity="0.3"/>
         <circle cx="60" cy="60" r="45" stroke="#D4AF37" stroke-width="1" opacity="0.5"/>
-        <polygon id="seal-poly" points="60,15 72,47 107,47 80,67 90,100 60,80 30,100 40,67 13,47 48,47" fill="none" stroke="#D4AF37" stroke-width="1.5"/>
+        <polygon points="60,15 72,47 107,47 80,67 90,100 60,80 30,100 40,67 13,47 48,47" fill="none" stroke="#D4AF37" stroke-width="1.5"/>
         <circle cx="60" cy="60" r="8" fill="#D4AF37" opacity="0.8"/>
       </svg>
     </div>
-    <div class="kuil-badge" id="stage-badge" style="margin: 0 auto 1rem;">Segel Terbuka</div>
+    <div class="kuil-badge" id="stage-badge" style="margin:0 auto 0.75rem;">Segel Terbuka</div>
     <div class="seal-title" id="stage-title">Seal of Origins</div>
-    <div class="seal-desc" id="stage-desc">Kamu telah membuka segel pertama. Pengetahuan sejarah memanah telah terukir dalam kisahmu.</div>
-    <div class="rings-earned-display" id="stage-rings"></div>
-    <button class="btn-primary" id="next-stage-btn" onclick="proceedToNext()">
-      ✦ Lanjut ke Ujian Berikutnya ✦
-    </button>
+    <div class="seal-desc" id="stage-desc">Kamu telah membuka segel pertama.</div>
+    <div class="rings-display" id="stage-rings" style="justify-content:center;margin-bottom:1.5rem;"></div>
+    <button class="btn-primary" id="next-stage-btn" onclick="proceedToNext()">✦ Lanjutkan ✦</button>
   </div>
 </div>
 
-<!-- ===== FINAL SCREEN ===== -->
+<!-- PRETEST COMPLETE -->
+<div id="pretest-complete-screen" class="screen">
+  <div class="stage-complete">
+    <div class="phase-banner pretest" style="margin-bottom:1rem;">Pretest Selesai</div>
+    <div class="seal-title">Pengetahuan Awal Tercatat</div>
+    <div class="seal-desc" id="pretest-complete-desc">Skormu telah dicatat. Kini saatnya menjelajahi tiga kuil pengetahuan.</div>
+    <div style="margin:1rem 0;">
+      <div class="ring-pill" style="font-size:1rem;padding:0.4rem 1.2rem;">◆ <span id="pretest-score-display">0</span> / 7 Jawaban Benar</div>
+    </div>
+    <div class="ornamented-divider">✦</div>
+    <button class="btn-primary" onclick="startKuils()">✦ Masuki Kuil Pertama ✦</button>
+  </div>
+</div>
+
+<!-- FINAL SCREEN -->
 <div id="final-screen" class="screen">
-  <div class="landing-seal" style="width:140px;height:140px;">
-    <svg viewBox="0 0 100 100" fill="none">
-      <polygon points="50,5 61,35 95,35 68,57 79,91 50,70 21,91 32,57 5,35 39,35" fill="rgba(212,175,55,0.2)" stroke="#D4AF37" stroke-width="1.5"/>
-      <circle cx="50" cy="50" r="15" fill="#D4AF37" opacity="0.9"/>
-    </svg>
+  <div class="phase-banner posttest" style="margin-bottom:1rem;">Perjalanan Selesai</div>
+  <div class="title-sub" style="margin-bottom:0.5rem;">Semua Segel Telah Terbuka</div>
+  <div class="score-compare">
+    <div class="score-box pre">
+      <div class="score-num" id="final-pre">0</div>
+      <div class="score-lbl">Pretest</div>
+    </div>
+    <div class="score-box delta">
+      <div class="score-num" id="final-delta">+0</div>
+      <div class="score-lbl">Peningkatan</div>
+    </div>
+    <div class="score-box post">
+      <div class="score-num" id="final-post">0</div>
+      <div class="score-lbl">Posttest</div>
+    </div>
   </div>
-  <div class="title-sub" style="margin-bottom:0.25rem;">Semua Segel Telah Terbuka</div>
-  <div class="final-score" id="final-score">7</div>
-  <div class="final-label">Cincin Legenda Terkumpul</div>
+  <div class="improvement-msg" id="improvement-msg"></div>
   <div class="rings-display" id="final-rings" style="justify-content:center;margin-bottom:1rem;flex-wrap:wrap;"></div>
-  <div class="final-msg" id="final-msg">Legenda telah tertulis. Namamu akan dikenang.</div>
-  <div class="ornamented-divider">✦</div>
-  <button class="btn-primary" onclick="restartQuiz()" style="margin-bottom:0.75rem;">
-    ✦ Mulai Lagi ✦
-  </button>
+  <div class="final-msg" id="final-msg"></div>
+  <button class="btn-primary" onclick="restartQuiz()">✦ Mulai Lagi ✦</button>
 </div>
 
-<!-- ===== ADMIN LOGIN ===== -->
+<!-- ADMIN LOGIN -->
 <div id="admin-login-screen" class="screen">
   <div class="admin-login-wrap">
     <h2>⚜ Admin Arcavia</h2>
     <input type="password" id="admin-pass-input" class="q-field" placeholder="Password admin..." style="text-align:center;">
-    <div style="height:0.75rem;"></div>
+    <div style="height:0.6rem;"></div>
     <button class="btn-primary" onclick="checkAdminPass()" style="width:100%;">Masuk</button>
-    <div style="height:0.75rem;"></div>
+    <div style="height:0.6rem;"></div>
     <button class="btn-ghost" onclick="showScreen('landing-screen')" style="width:100%;">Kembali</button>
-    <div id="admin-pass-err" style="color:#E74C3C;font-size:0.8rem;margin-top:0.75rem;min-height:1.2rem;"></div>
+    <div id="admin-pass-err" style="color:#E74C3C;font-size:0.8rem;margin-top:0.6rem;min-height:1.2rem;"></div>
   </div>
 </div>
 
-<!-- ===== ADMIN PANEL ===== -->
+<!-- ADMIN PANEL -->
 <div id="admin-screen" class="screen">
   <div class="admin-nav">
     <div class="admin-nav-title">⚜ Admin Panel — Arcavia Quiz</div>
-    <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
-      <button class="btn-ghost" onclick="loadAdminData()" style="font-size:0.7rem;padding:0.4rem 0.8rem;">↻ Refresh</button>
-      <button class="btn-ghost" onclick="confirmDeleteAll()" style="font-size:0.7rem;padding:0.4rem 0.8rem;border-color:rgba(231,76,60,0.3);color:#E74C3C;">🗑 Hapus Semua Data Test</button>
-      <button class="btn-ghost" onclick="showScreen('landing-screen')" style="font-size:0.7rem;padding:0.4rem 0.8rem;">✕ Keluar</button>
+    <div style="display:flex;gap:0.4rem;flex-wrap:wrap;">
+      <button class="btn-ghost" onclick="loadAdminData()" style="font-size:0.65rem;padding:0.35rem 0.7rem;">↻ Refresh</button>
+      <button class="btn-ghost" onclick="exportExcel()" style="font-size:0.65rem;padding:0.35rem 0.7rem;border-color:rgba(46,204,113,0.3);color:#2ECC71;">↓ Export Excel</button>
+      <button class="btn-ghost" onclick="confirmDeleteAll()" style="font-size:0.65rem;padding:0.35rem 0.7rem;border-color:rgba(231,76,60,0.3);color:#E74C3C;">🗑 Hapus Semua</button>
+      <button class="btn-ghost" onclick="showScreen('landing-screen')" style="font-size:0.65rem;padding:0.35rem 0.7rem;">✕ Keluar</button>
     </div>
   </div>
   <div class="admin-body">
     <div class="stats-grid">
       <div class="stat-card"><div class="stat-num" id="stat-total">—</div><div class="stat-lbl">Total Peserta</div></div>
-      <div class="stat-card"><div class="stat-num" id="stat-avg">—</div><div class="stat-lbl">Rata-rata Cincin</div></div>
-      <div class="stat-card"><div class="stat-num" id="stat-perfect">—</div><div class="stat-lbl">Skor Sempurna</div></div>
+      <div class="stat-card"><div class="stat-num" id="stat-avg-pre">—</div><div class="stat-lbl">Rata Pretest</div></div>
+      <div class="stat-card"><div class="stat-num" id="stat-avg-post">—</div><div class="stat-lbl">Rata Posttest</div></div>
+      <div class="stat-card"><div class="stat-num" id="stat-avg-delta">—</div><div class="stat-lbl">Rata Peningkatan</div></div>
       <div class="stat-card"><div class="stat-num" id="stat-today">—</div><div class="stat-lbl">Hari Ini</div></div>
     </div>
-
     <div class="admin-tabs">
       <button class="admin-tab active" onclick="switchAdminTab('participants')">Peserta</button>
       <button class="admin-tab" onclick="switchAdminTab('questions')">Edit Soal</button>
     </div>
 
-    <!-- PARTICIPANTS TAB -->
+    <!-- PARTICIPANTS -->
     <div id="tab-participants" class="admin-panel active">
-      <div id="participants-loading" class="loading-rune"></div>
-      <div id="delete-bar" style="display:none;margin-bottom:0.75rem;display:none;align-items:center;gap:0.75rem;flex-wrap:wrap;">
-        <span id="selected-count" style="font-family:'Cinzel',serif;font-size:0.75rem;color:var(--text-dim);letter-spacing:0.05em;"></span>
-        <button class="btn-ghost" onclick="deleteSelected()" style="font-size:0.7rem;padding:0.35rem 0.9rem;border-color:rgba(231,76,60,0.4);color:#E74C3C;">🗑 Hapus yang Dipilih</button>
-        <button class="btn-ghost" onclick="clearSelection()" style="font-size:0.7rem;padding:0.35rem 0.9rem;">✕ Batal Pilih</button>
+      <div class="delete-bar" id="delete-bar">
+        <span id="selected-count" style="font-family:'Cinzel',serif;font-size:0.7rem;color:var(--text-dim);"></span>
+        <button class="btn-ghost" onclick="deleteSelected()" style="font-size:0.65rem;padding:0.3rem 0.7rem;border-color:rgba(231,76,60,0.4);color:#E74C3C;">🗑 Hapus Dipilih</button>
+        <button class="btn-ghost" onclick="clearSelection()" style="font-size:0.65rem;padding:0.3rem 0.7rem;">✕ Batal</button>
       </div>
+      <div id="participants-loading" class="loading-rune"></div>
       <div class="admin-table-wrap" id="participants-table-wrap" style="display:none;">
         <table>
           <thead>
             <tr>
-              <th style="width:36px;"><input type="checkbox" id="select-all" onclick="toggleSelectAll(this)" style="accent-color:#D4AF37;cursor:pointer;"></th>
-              <th>#</th>
-              <th>Nama</th>
-              <th>Cincin</th>
-              <th>K1</th>
-              <th>K2</th>
-              <th>K3</th>
-              <th>Waktu</th>
+              <th><input type="checkbox" id="select-all" onclick="toggleSelectAll(this)" style="accent-color:#D4AF37;cursor:pointer;"></th>
+              <th>#</th><th>Nama</th><th>Kategori</th>
+              <th>Pretest</th><th>Posttest</th><th>Delta</th>
+              <th>K1</th><th>K2</th><th>K3</th><th>Waktu</th>
             </tr>
           </thead>
           <tbody id="participants-tbody"></tbody>
         </table>
       </div>
-      <div id="no-participants" style="text-align:center;padding:2rem;color:var(--text-dim);font-style:italic;display:none;">
-        Belum ada peserta yang mengikuti kuis.
-      </div>
+      <div id="no-participants" style="text-align:center;padding:2rem;color:var(--text-dim);font-style:italic;display:none;">Belum ada peserta.</div>
     </div>
 
-    <!-- QUESTIONS TAB -->
+    <!-- QUESTIONS -->
     <div id="tab-questions" class="admin-panel">
       <div id="questions-loading" class="loading-rune"></div>
       <div id="questions-editor" style="display:none;"></div>
       <div style="margin-top:1rem;text-align:right;">
-        <button class="btn-primary" id="save-questions-btn" onclick="saveQuestions()" style="display:none;">
-          ✦ Simpan Semua Soal
-        </button>
+        <button class="btn-primary" id="save-questions-btn" onclick="saveQuestions()" style="display:none;">✦ Simpan Soal</button>
       </div>
     </div>
   </div>
@@ -840,605 +380,500 @@
 <div id="toast"></div>
 
 <script>
-// ===== SUPABASE CONFIG =====
 const SUPABASE_URL = 'https://gylfujfcnumbmpopfmoi.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd5bGZ1amZjbnVtYm1wb3BmbW9pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1NDc0MjIsImV4cCI6MjA5NDEyMzQyMn0.1hr6jzYhfOUCGCPs6BpCYL6id3LKoukTltG7vbT64kQ';
 const ADMIN_PASSWORD = 'arcavia2026';
-
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// ===== DEFAULT QUESTIONS =====
+// ===== DEFAULT QUESTIONS (pretest = posttest) =====
 const defaultQuestions = [
-  {
-    kuil: 1,
-    order: 1,
-    question: "Di negara manakah panahan modern pertama kali dikembangkan sebagai olahraga kompetitif?",
-    options: ["Inggris", "Cina", "Persia", "Jepang"],
-    correct: 0
-  },
-  {
-    kuil: 1,
-    order: 2,
-    question: "Pada tahun berapa panahan pertama kali masuk sebagai cabang olahraga Olimpiade modern?",
-    options: ["1896", "1900", "1908", "1920"],
-    correct: 1
-  },
-  {
-    kuil: 2,
-    order: 1,
-    question: "Bagian panah yang berfungsi menstabilkan laju anak panah saat melayang di udara disebut?",
-    options: ["Nock", "Fletch (bulu)", "Point", "Shaft"],
-    correct: 1
-  },
-  {
-    kuil: 2,
-    order: 2,
-    question: "Posisi berdiri tegak menyamping menghadap target dalam teknik memanah disebut?",
-    options: ["Square stance", "Open stance", "Side stance", "Natural stance"],
-    correct: 0
-  },
-  {
-    kuil: 3,
-    order: 1,
-    question: "Jarak standar untuk kategori Recurve Senior putra dalam kompetisi outdoor World Archery adalah?",
-    options: ["50 meter", "60 meter", "70 meter", "90 meter"],
-    correct: 2
-  },
-  {
-    kuil: 3,
-    order: 2,
-    question: "Zona warna kuning (gold) pada target face panahan mendapat nilai berapa?",
-    options: ["8 dan 9", "9 dan 10", "10 dan X", "X saja"],
-    correct: 1
-  },
-  {
-    kuil: 3,
-    order: 3,
-    question: "Gerakan melepas tali busur secara terkontrol dan konsisten dalam teknik memanah disebut?",
-    options: ["Draw", "Anchor", "Release", "Follow-through"],
-    correct: 2
-  }
+  { id:1, order:1, question:"Di negara manakah panahan modern pertama kali dikembangkan sebagai olahraga kompetitif?", options:["Inggris","Cina","Persia","Jepang"], correct:0 },
+  { id:2, order:2, question:"Pada tahun berapa panahan pertama kali masuk sebagai cabang olahraga Olimpiade modern?", options:["1896","1900","1908","1920"], correct:1 },
+  { id:3, order:3, question:"Bagian panah yang berfungsi menstabilkan laju anak panah saat melayang di udara disebut?", options:["Nock","Fletch (bulu)","Point","Shaft"], correct:1 },
+  { id:4, order:4, question:"Posisi berdiri tegak menyamping menghadap target dalam teknik memanah disebut?", options:["Square stance","Open stance","Side stance","Natural stance"], correct:0 },
+  { id:5, order:5, question:"Jarak standar untuk kategori Recurve Senior putra dalam kompetisi outdoor World Archery adalah?", options:["50 meter","60 meter","70 meter","90 meter"], correct:2 },
+  { id:6, order:6, question:"Zona warna kuning (gold) pada target face panahan mendapat nilai berapa?", options:["8 dan 9","9 dan 10","10 dan X","X saja"], correct:1 },
+  { id:7, order:7, question:"Gerakan melepas tali busur secara terkontrol dan konsisten dalam teknik memanah disebut?", options:["Draw","Anchor","Release","Follow-through"], correct:2 }
 ];
 
 const kuilInfo = [
-  { name: "Kuil 1 : The History of Archery", subtitle: "Segel Pertama — Seal of Origins", badge: "k1", sealName: "Seal of Origins", desc: "Kamu telah membuka segel pertama. Sejarah panahan kini terukir dalam kisah perjalananmu.", rings: 2 },
-  { name: "Kuil 2 : What You Need to Know as an Archer", subtitle: "Segel Kedua — Seal of Knowledge", badge: "k2", sealName: "Seal of Knowledge", desc: "Segel pengetahuan terbuka. Ilmu teknis memanah telah menjadi bekalmu untuk medan perang.", rings: 2 },
-  { name: "Kuil 3 : The First Battlefield", subtitle: "Segel Ketiga — Seal of Valor", badge: "k3", sealName: "Seal of Valor", desc: "Tiga segel telah terbuka. Keberanian dan ketepatan telah kamu buktikan di medan pertama.", rings: 3 }
+  { name:"Kuil 1 : The History of Archery", subtitle:"Segel Pertama — Seal of Origins", badge:"k1", sealName:"Seal of Origins", desc:"Kamu telah membuka segel pertama. Sejarah panahan kini terukir dalam kisahmu.", qRange:[0,1] },
+  { name:"Kuil 2 : What You Need to Know as an Archer", subtitle:"Segel Kedua — Seal of Knowledge", badge:"k2", sealName:"Seal of Knowledge", desc:"Segel pengetahuan terbuka. Ilmu teknis memanah telah menjadi bekalmu.", qRange:[2,3] },
+  { name:"Kuil 3 : The First Battlefield", subtitle:"Segel Ketiga — Seal of Valor", badge:"k3", sealName:"Seal of Valor", desc:"Tiga segel telah terbuka. Keberanian dan ketepatan telah kamu buktikan.", qRange:[4,6] }
 ];
 
-// ===== STATE =====
+// PHASE: 'pretest' | 'kuil' | 'posttest'
 let state = {
-  playerName: '',
-  currentKuil: 0,
-  currentQ: 0,
-  totalRings: 0,
-  kuilRings: [0, 0, 0],
-  answers: [],
-  questions: [],
-  sessionId: null,
-  answered: false
+  playerName:'', playerOrigin:'',
+  phase:'pretest',
+  currentKuil:0, currentQ:0,
+  pretestScore:0, posttestScore:0,
+  kuilRings:[0,0,0],
+  pretestAnswers:[], posttestAnswers:[], kuilAnswers:[],
+  questions:[], sessionId:null, answered:false
 };
 
 // ===== STARS =====
-(function initStars() {
-  const canvas = document.getElementById('starsCanvas');
-  const ctx = canvas.getContext('2d');
+(function(){
+  const c = document.getElementById('stars');
+  const ctx = c.getContext('2d');
   let stars = [];
-  function resize() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    stars = Array.from({length: 120}, () => ({
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height,
-      r: Math.random() * 1.2 + 0.2,
-      alpha: Math.random() * 0.7 + 0.1,
-      speed: Math.random() * 0.003 + 0.001
-    }));
-  }
-  function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    stars.forEach(s => {
-      s.alpha += Math.sin(Date.now() * s.speed) * 0.005;
-      s.alpha = Math.max(0.05, Math.min(0.9, s.alpha));
-      ctx.beginPath();
-      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(212,175,55,${s.alpha})`;
-      ctx.fill();
-    });
-    requestAnimationFrame(draw);
-  }
-  window.addEventListener('resize', resize);
-  resize(); draw();
+  function resize(){ c.width=innerWidth; c.height=innerHeight; stars=Array.from({length:100},()=>({x:Math.random()*c.width,y:Math.random()*c.height,r:Math.random()*1.2+0.2,a:Math.random()*0.6+0.1,s:Math.random()*0.003+0.001})); }
+  function draw(){ ctx.clearRect(0,0,c.width,c.height); stars.forEach(s=>{ s.a+=Math.sin(Date.now()*s.s)*0.004; s.a=Math.max(0.05,Math.min(0.85,s.a)); ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2); ctx.fillStyle='rgba(212,175,55,'+s.a+')'; ctx.fill(); }); requestAnimationFrame(draw); }
+  window.addEventListener('resize',resize); resize(); draw();
 })();
 
 // ===== UTILS =====
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-}
-
-function toast(msg, duration = 2500) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), duration);
-}
-
-function renderRingsDisplay(containerId, total, earned) {
-  const wrap = document.getElementById(containerId);
-  wrap.innerHTML = '';
-  for (let i = 0; i < total; i++) {
-    const d = document.createElement('div');
-    d.className = 'ring-item' + (i < earned ? ' earned' : '');
-    d.textContent = i < earned ? '◆' : '◇';
-    wrap.appendChild(d);
-  }
-}
+function showScreen(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+function toast(msg,d=2500){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),d); }
+function renderRings(id,total,earned){ const w=document.getElementById(id); w.innerHTML=''; for(let i=0;i<total;i++){ const d=document.createElement('div'); d.className='ring-item'+(i<earned?' earned':''); d.textContent=i<earned?'◆':'◇'; w.appendChild(d); } }
 
 // ===== LOAD QUESTIONS =====
-async function loadQuestions() {
+async function loadQuestions(){
   try {
-    const { data, error } = await sb.from('questions').select('*').order('kuil').order('order');
-    if (error || !data || data.length === 0) {
-      state.questions = defaultQuestions;
-    } else {
-      state.questions = data.map(d => ({
-        kuil: d.kuil, order: d.order,
-        question: d.question,
-        options: typeof d.options === 'string' ? JSON.parse(d.options) : d.options,
-        correct: d.correct
-      }));
-    }
-  } catch(e) {
-    state.questions = defaultQuestions;
+    const {data,error} = await sb.from('questions').select('*').order('order');
+    if(error||!data||data.length===0){ state.questions=defaultQuestions; return; }
+    state.questions = data.map(d=>({...d, options:typeof d.options==='string'?JSON.parse(d.options):d.options}));
+  } catch(e){ state.questions=defaultQuestions; }
+}
+
+// ===== START =====
+async function startJourney(){
+  const name = document.getElementById('player-name').value.trim();
+  const origin = document.getElementById('player-origin').value.trim();
+  if(!name){ toast('Tuliskan namamu dulu!'); return; }
+  state.playerName=name; state.playerOrigin=origin||'—';
+  state.phase='pretest'; state.currentQ=0;
+  state.pretestScore=0; state.posttestScore=0;
+  state.kuilRings=[0,0,0]; state.currentKuil=0;
+  state.pretestAnswers=[]; state.posttestAnswers=[]; state.kuilAnswers=[];
+  state.sessionId='sess_'+Date.now()+'_'+Math.random().toString(36).slice(2,7);
+
+  document.getElementById('start-btn').disabled=true;
+  await loadQuestions();
+  document.getElementById('start-btn').disabled=false;
+  startPhase('pretest');
+}
+
+// ===== PHASE MANAGEMENT =====
+function startPhase(phase){
+  state.phase=phase; state.currentQ=0; state.answered=false;
+
+  if(phase==='pretest'){
+    document.getElementById('phase-banner').textContent='Pretest';
+    document.getElementById('phase-banner').className='phase-banner pretest';
+    document.getElementById('kuil-badge').textContent='Pretest';
+    document.getElementById('kuil-badge').className='kuil-badge pre';
+    document.getElementById('kuil-title').textContent='Uji Pengetahuan Awal';
+    document.getElementById('kuil-subtitle').textContent='Jawab sesuai pengetahuanmu saat ini — tidak ada benar/salah';
+    renderRings('rings-display',7,0);
+    showScreen('quiz-screen');
+    showQuestion();
+  } else if(phase==='posttest'){
+    document.getElementById('phase-banner').textContent='Posttest';
+    document.getElementById('phase-banner').className='phase-banner posttest';
+    document.getElementById('kuil-badge').textContent='Posttest';
+    document.getElementById('kuil-badge').className='kuil-badge post';
+    document.getElementById('kuil-title').textContent='Uji Pengetahuan Akhir';
+    document.getElementById('kuil-subtitle').textContent='Jawab kembali pertanyaan yang sama setelah menjelajahi semua kuil';
+    renderRings('rings-display',7,0);
+    showScreen('quiz-screen');
+    showQuestion();
   }
 }
 
-function getKuilQuestions(kuilNum) {
-  return state.questions.filter(q => q.kuil === kuilNum).sort((a,b) => a.order - b.order);
-}
-
-// ===== START JOURNEY =====
-async function startJourney() {
-  const name = document.getElementById('player-name').value.trim();
-  if (!name) { toast('Tuliskan namamu dulu, pemanah!'); return; }
-  state.playerName = name;
-  state.currentKuil = 0;
-  state.currentQ = 0;
-  state.totalRings = 0;
-  state.kuilRings = [0, 0, 0];
-  state.answers = [];
-  state.sessionId = 'sess_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
-
-  document.getElementById('start-btn').disabled = true;
-  await loadQuestions();
-  document.getElementById('start-btn').disabled = false;
-
+function startKuils(){
+  state.currentKuil=0;
   showKuil(0);
 }
 
-// ===== SHOW KUIL =====
-function showKuil(kuilIdx) {
-  state.currentKuil = kuilIdx;
-  state.currentQ = 0;
-  state.answered = false;
-  const info = kuilInfo[kuilIdx];
-
-  const badge = document.getElementById('kuil-badge');
-  badge.textContent = `Kuil ${kuilIdx + 1}`;
-  badge.className = 'kuil-badge ' + info.badge;
-  document.getElementById('kuil-title').textContent = info.name;
-  document.getElementById('kuil-subtitle').textContent = info.subtitle;
-
-  renderRingsDisplay('rings-display', 7, state.totalRings);
+function showKuil(idx){
+  state.currentKuil=idx; state.currentQ=0; state.answered=false; state.phase='kuil';
+  const info=kuilInfo[idx];
+  document.getElementById('phase-banner').textContent='Kuil '+(idx+1)+' dari 3';
+  document.getElementById('phase-banner').className='phase-banner kuil';
+  document.getElementById('kuil-badge').textContent='Kuil '+(idx+1);
+  document.getElementById('kuil-badge').className='kuil-badge '+info.badge;
+  document.getElementById('kuil-title').textContent=info.name;
+  document.getElementById('kuil-subtitle').textContent=info.subtitle;
+  renderRings('rings-display',7,state.kuilRings.reduce((a,b)=>a+b,0));
   showScreen('quiz-screen');
   showQuestion();
 }
 
 // ===== SHOW QUESTION =====
-function showQuestion() {
-  const qs = getKuilQuestions(state.currentKuil + 1);
-  const q = qs[state.currentQ];
-  const totalQ = qs.length;
-  const overallIdx = state.questions.filter(x => x.kuil < state.currentKuil + 1).length + state.currentQ;
-  const totalOverall = state.questions.length;
+function showQuestion(){
+  let q, totalQ, qIdx;
 
-  document.getElementById('question-num').textContent = `PERTANYAAN ${state.currentQ + 1}`;
-  document.getElementById('question-text').textContent = q.question;
-  document.getElementById('q-progress-text').textContent = `Pertanyaan ${state.currentQ + 1} dari ${totalQ}`;
-  document.getElementById('rings-count').textContent = `${state.totalRings} / 7 Cincin`;
+  if(state.phase==='pretest'||state.phase==='posttest'){
+    q=state.questions[state.currentQ];
+    totalQ=state.questions.length;
+    qIdx=state.currentQ;
+  } else {
+    const range=kuilInfo[state.currentKuil].qRange;
+    qIdx=range[0]+state.currentQ;
+    q=state.questions[qIdx];
+    totalQ=range[1]-range[0]+1;
+  }
 
-  const pct = (overallIdx / totalOverall) * 100;
-  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('question-num').textContent='PERTANYAAN '+(state.currentQ+1);
+  document.getElementById('question-text').textContent=q.question;
+  document.getElementById('q-progress-text').textContent='Pertanyaan '+(state.currentQ+1)+' dari '+totalQ;
 
-  const wrap = document.getElementById('options-wrap');
-  wrap.innerHTML = '';
-  const labels = ['A', 'B', 'C', 'D'];
-  q.options.forEach((opt, i) => {
-    const btn = document.createElement('button');
-    btn.className = 'option-btn';
-    btn.innerHTML = `<span class="opt-label">${labels[i]}</span>${opt}`;
-    btn.onclick = () => answerQuestion(i);
+  const totalRings = state.kuilRings.reduce((a,b)=>a+b,0);
+  if(state.phase==='kuil'){
+    document.getElementById('rings-count').textContent=totalRings+' / 7';
+    renderRings('rings-display',7,totalRings);
+  } else {
+    document.getElementById('rings-count').textContent=(state.currentQ+1)+' / '+totalQ;
+  }
+
+  // Overall progress bar
+  let overallDone=0, overallTotal=state.questions.length*2+state.questions.length;
+  if(state.phase==='pretest') overallDone=state.currentQ;
+  else if(state.phase==='kuil'){
+    overallDone=state.questions.length;
+    for(let k=0;k<state.currentKuil;k++) overallDone+=kuilInfo[k].qRange[1]-kuilInfo[k].qRange[0]+1;
+    overallDone+=state.currentQ;
+  } else {
+    overallDone=state.questions.length+state.questions.length+state.currentQ;
+  }
+  document.getElementById('progress-fill').style.width=(overallDone/overallTotal*100)+'%';
+
+  const wrap=document.getElementById('options-wrap');
+  wrap.innerHTML='';
+  const labels=['A','B','C','D'];
+  q.options.forEach((opt,i)=>{
+    const btn=document.createElement('button');
+    btn.className='option-btn';
+    btn.innerHTML='<span class="opt-label">'+labels[i]+'</span>'+opt;
+    btn.onclick=()=>answerQuestion(i, q.correct);
     wrap.appendChild(btn);
   });
 
-  document.getElementById('feedback-msg').textContent = '';
-  document.getElementById('feedback-msg').className = 'feedback-msg';
-  state.answered = false;
+  document.getElementById('feedback-msg').textContent='';
+  document.getElementById('feedback-msg').className='feedback-msg';
+  state.answered=false;
 
-  const card = document.getElementById('question-card');
-  card.style.animation = 'none';
-  card.offsetHeight;
-  card.style.animation = 'fadeSlideIn 0.4s ease';
+  const card=document.getElementById('question-card');
+  card.style.animation='none'; card.offsetHeight; card.style.animation='fadeSlideIn 0.4s ease';
 }
 
 // ===== ANSWER =====
-function answerQuestion(choiceIdx) {
-  if (state.answered) return;
-  state.answered = true;
+function answerQuestion(choice, correctIdx){
+  if(state.answered) return;
+  state.answered=true;
+  const correct=choice===correctIdx;
+  const btns=document.querySelectorAll('.option-btn');
+  btns.forEach((b,i)=>{ b.disabled=true; if(i===correctIdx) b.classList.add('correct'); else if(i===choice&&!correct) b.classList.add('wrong'); });
 
-  const qs = getKuilQuestions(state.currentKuil + 1);
-  const q = qs[state.currentQ];
-  const correct = choiceIdx === q.correct;
-  const btns = document.querySelectorAll('.option-btn');
-  btns.forEach((btn, i) => {
-    btn.disabled = true;
-    if (i === q.correct) btn.classList.add('correct');
-    else if (i === choiceIdx && !correct) btn.classList.add('wrong');
-  });
+  const fb=document.getElementById('feedback-msg');
 
-  const fb = document.getElementById('feedback-msg');
-  if (correct) {
-    state.totalRings++;
-    state.kuilRings[state.currentKuil]++;
-    renderRingsDisplay('rings-display', 7, state.totalRings);
-    document.getElementById('rings-count').textContent = `${state.totalRings} / 7 Cincin`;
-    fb.textContent = '✦ Benar! Cincin terukir untukmu.';
-    fb.className = 'feedback-msg correct';
+  if(state.phase==='pretest'){
+    if(correct) state.pretestScore++;
+    state.pretestAnswers.push({q:state.currentQ,choice,correct});
+    fb.textContent=correct?'✦ Benar!':'✦ Belum tepat.';
+    fb.className='feedback-msg '+(correct?'correct':'wrong');
+  } else if(state.phase==='posttest'){
+    if(correct) state.posttestScore++;
+    state.posttestAnswers.push({q:state.currentQ,choice,correct});
+    fb.textContent=correct?'✦ Benar! Ilmumu telah berkembang.':'✦ Belum tepat. Terus belajar!';
+    fb.className='feedback-msg '+(correct?'correct':'wrong');
   } else {
-    document.getElementById('question-card').classList.add('shake');
-    setTimeout(() => document.getElementById('question-card').classList.remove('shake'), 400);
-    fb.textContent = '✦ Belum tepat. Teruslah belajar, pemanah.';
-    fb.className = 'feedback-msg wrong';
+    if(correct){ state.kuilRings[state.currentKuil]++; renderRings('rings-display',7,state.kuilRings.reduce((a,b)=>a+b,0)); document.getElementById('rings-count').textContent=state.kuilRings.reduce((a,b)=>a+b,0)+' / 7'; }
+    state.kuilAnswers.push({kuil:state.currentKuil+1,q:state.currentQ,choice,correct});
+    fb.textContent=correct?'✦ Benar! Cincin terukir.':'✦ Belum tepat.';
+    fb.className='feedback-msg '+(correct?'correct':'wrong');
   }
 
-  state.answers.push({ kuil: state.currentKuil + 1, q: state.currentQ + 1, choice: choiceIdx, correct });
+  setTimeout(()=>{
+    const isLastQ = state.phase==='pretest'||state.phase==='posttest'
+      ? state.currentQ+1>=state.questions.length
+      : state.currentQ+1>=(kuilInfo[state.currentKuil].qRange[1]-kuilInfo[state.currentKuil].qRange[0]+1);
 
-  setTimeout(() => {
-    if (state.currentQ + 1 < qs.length) {
-      state.currentQ++;
-      showQuestion();
-    } else {
-      showStageComplete();
+    if(!isLastQ){ state.currentQ++; showQuestion(); }
+    else {
+      if(state.phase==='pretest') showPretestComplete();
+      else if(state.phase==='kuil') showStageComplete();
+      else showFinal();
     }
-  }, 1400);
+  }, 1200);
+}
+
+// ===== PRETEST COMPLETE =====
+function showPretestComplete(){
+  document.getElementById('pretest-score-display').textContent=state.pretestScore;
+  document.getElementById('pretest-complete-desc').textContent='Skormu '+state.pretestScore+' dari 7 telah dicatat. Kini saatnya menjelajahi tiga kuil pengetahuan!';
+  showScreen('pretest-complete-screen');
 }
 
 // ===== STAGE COMPLETE =====
-function showStageComplete() {
-  const info = kuilInfo[state.currentKuil];
-  const badge = document.getElementById('stage-badge');
-  badge.textContent = info.sealName;
-  badge.className = 'kuil-badge ' + info.badge;
-  document.getElementById('stage-title').textContent = info.sealName;
-  document.getElementById('stage-desc').textContent = info.desc;
-
-  const rings = document.getElementById('stage-rings');
-  rings.innerHTML = '';
-  for (let i = 0; i < info.rings; i++) {
-    const d = document.createElement('div');
-    const earned = i < state.kuilRings[state.currentKuil];
-    d.className = 'ring-item' + (earned ? ' earned' : '');
-    d.textContent = earned ? '◆' : '◇';
-    rings.appendChild(d);
-  }
-
-  const nextBtn = document.getElementById('next-stage-btn');
-  if (state.currentKuil === 2) {
-    nextBtn.textContent = '✦ Lihat Hasil Akhir ✦';
-  } else {
-    nextBtn.textContent = '✦ Lanjut ke Ujian Berikutnya ✦';
-  }
-
+function showStageComplete(){
+  const info=kuilInfo[state.currentKuil];
+  const badge=document.getElementById('stage-badge');
+  badge.textContent=info.sealName; badge.className='kuil-badge '+info.badge;
+  document.getElementById('stage-title').textContent=info.sealName;
+  document.getElementById('stage-desc').textContent=info.desc;
+  const earned=state.kuilRings[state.currentKuil];
+  const total=kuilInfo[state.currentKuil].qRange[1]-kuilInfo[state.currentKuil].qRange[0]+1;
+  renderRings('stage-rings',total,earned);
+  const btn=document.getElementById('next-stage-btn');
+  btn.textContent=state.currentKuil===2?'✦ Mulai Posttest ✦':'✦ Lanjut ke Kuil Berikutnya ✦';
   showScreen('stage-screen');
 }
 
-// ===== PROCEED NEXT =====
-async function proceedToNext() {
-  if (state.currentKuil === 2) {
-    await saveResult();
-    showFinal();
-  } else {
-    showKuil(state.currentKuil + 1);
+function proceedToNext(){
+  if(state.phase==='kuil'){
+    if(state.currentKuil<2){ showKuil(state.currentKuil+1); }
+    else { startPhase('posttest'); }
   }
-}
-
-// ===== SAVE RESULT =====
-async function saveResult() {
-  try {
-    await sb.from('participants').insert({
-      session_id: state.sessionId,
-      name: state.playerName,
-      total_rings: state.totalRings,
-      kuil1_rings: state.kuilRings[0],
-      kuil2_rings: state.kuilRings[1],
-      kuil3_rings: state.kuilRings[2],
-      answers: JSON.stringify(state.answers),
-      created_at: new Date().toISOString()
-    });
-  } catch(e) { /* silent fail */ }
 }
 
 // ===== FINAL =====
-function showFinal() {
-  document.getElementById('final-score').textContent = state.totalRings;
-  renderRingsDisplay('final-rings', 7, state.totalRings);
+async function showFinal(){
+  await saveResult();
+  const pre=state.pretestScore, post=state.posttestScore;
+  const delta=post-pre;
+  document.getElementById('final-pre').textContent=pre;
+  document.getElementById('final-post').textContent=post;
+  document.getElementById('final-delta').textContent=(delta>=0?'+':'')+delta;
+  renderRings('final-rings',7,state.kuilRings.reduce((a,b)=>a+b,0));
 
-  let msg = '';
-  if (state.totalRings === 7) msg = `Sempurna, ${state.playerName}! Semua tujuh cincin telah kamu rebut. Legenda sejati telah lahir.`;
-  else if (state.totalRings >= 5) msg = `Luar biasa, ${state.playerName}! ${state.totalRings} cincin dalam genggaman. Kamu telah membuktikan dirimu layak menjadi pemanah Arcavia.`;
-  else if (state.totalRings >= 3) msg = `Bagus, ${state.playerName}! ${state.totalRings} dari 7 cincin berhasil kamu kumpulkan. Masih ada ruang untuk terus berkembang.`;
-  else msg = `Perjalanan ini baru dimulai, ${state.playerName}. ${state.totalRings} cincin terkumpul. Ulangi lagi dan perkuat pengetahuanmu!`;
+  const impEl=document.getElementById('improvement-msg');
+  if(delta>0){ impEl.textContent='🏹 Luar biasa! Pengetahuanmu meningkat '+delta+' poin setelah mengunjungi kuil.'; impEl.className='improvement-msg up'; }
+  else if(delta===0){ impEl.textContent='Pengetahuanmu konsisten. Pertahankan dan terus belajar!'; impEl.className='improvement-msg same'; }
+  else { impEl.textContent='Tetap semangat! Perjalanan belajar belum berakhir.'; impEl.className='improvement-msg down'; }
 
-  document.getElementById('final-msg').textContent = msg;
+  const totalRings=state.kuilRings.reduce((a,b)=>a+b,0);
+  let msg='';
+  if(totalRings===7) msg='Sempurna, '+state.playerName+'! Semua tujuh cincin dalam genggaman. Legenda sejati telah lahir.';
+  else if(totalRings>=5) msg='Luar biasa, '+state.playerName+'! '+totalRings+' dari 7 cincin berhasil dikumpulkan.';
+  else msg='Perjalanan ini baru dimulai, '+state.playerName+'. Terus tingkatkan pengetahuan panahanmu!';
+  document.getElementById('final-msg').textContent=msg;
   showScreen('final-screen');
 }
 
-function restartQuiz() {
-  document.getElementById('player-name').value = '';
-  showScreen('landing-screen');
+// ===== SAVE =====
+async function saveResult(){
+  try {
+    await sb.from('participants').insert({
+      session_id:state.sessionId, name:state.playerName, origin:state.playerOrigin,
+      pretest_score:state.pretestScore, posttest_score:state.posttestScore,
+      delta:state.posttestScore-state.pretestScore,
+      kuil1_rings:state.kuilRings[0], kuil2_rings:state.kuilRings[1], kuil3_rings:state.kuilRings[2],
+      total_kuil_rings:state.kuilRings.reduce((a,b)=>a+b,0),
+      pretest_answers:JSON.stringify(state.pretestAnswers),
+      posttest_answers:JSON.stringify(state.posttestAnswers),
+      created_at:new Date().toISOString()
+    });
+  } catch(e){ console.error('Save failed',e); }
 }
+
+function restartQuiz(){ document.getElementById('player-name').value=''; document.getElementById('player-origin').value=''; showScreen('landing-screen'); }
 
 // ===== ADMIN =====
-function showAdminLogin() { showScreen('admin-login-screen'); }
+function showAdminLogin(){ showScreen('admin-login-screen'); }
+function checkAdminPass(){
+  if(document.getElementById('admin-pass-input').value===ADMIN_PASSWORD){
+    document.getElementById('admin-pass-input').value='';
+    document.getElementById('admin-pass-err').textContent='';
+    showScreen('admin-screen'); loadAdminData();
+  } else { document.getElementById('admin-pass-err').textContent='Password salah.'; }
+}
+document.getElementById('admin-pass-input').addEventListener('keydown',e=>{ if(e.key==='Enter') checkAdminPass(); });
 
-function checkAdminPass() {
-  const pass = document.getElementById('admin-pass-input').value;
-  if (pass === ADMIN_PASSWORD) {
-    document.getElementById('admin-pass-input').value = '';
-    document.getElementById('admin-pass-err').textContent = '';
-    showScreen('admin-screen');
-    loadAdminData();
-  } else {
-    document.getElementById('admin-pass-err').textContent = 'Password salah.';
-  }
+function switchAdminTab(tab){
+  document.querySelectorAll('.admin-tab').forEach((t,i)=>t.classList.toggle('active',['participants','questions'][i]===tab));
+  document.getElementById('tab-participants').classList.toggle('active',tab==='participants');
+  document.getElementById('tab-questions').classList.toggle('active',tab==='questions');
+  if(tab==='questions') loadQuestionsEditor();
 }
 
-document.getElementById('admin-pass-input').addEventListener('keydown', e => {
-  if (e.key === 'Enter') checkAdminPass();
-});
-
-function switchAdminTab(tab) {
-  document.querySelectorAll('.admin-tab').forEach((t,i) => {
-    t.classList.toggle('active', ['participants','questions'][i] === tab);
-  });
-  document.getElementById('tab-participants').classList.toggle('active', tab === 'participants');
-  document.getElementById('tab-questions').classList.toggle('active', tab === 'questions');
-  if (tab === 'questions') loadQuestionsEditor();
-}
-
-async function loadAdminData() {
-  // Load participants
-  document.getElementById('participants-loading').style.display = 'block';
-  document.getElementById('participants-table-wrap').style.display = 'none';
-  document.getElementById('no-participants').style.display = 'none';
-
+async function loadAdminData(){
+  document.getElementById('participants-loading').style.display='block';
+  document.getElementById('participants-table-wrap').style.display='none';
+  document.getElementById('no-participants').style.display='none';
   try {
-    const { data, error } = await sb.from('participants').select('*').order('created_at', { ascending: false });
-    document.getElementById('participants-loading').style.display = 'none';
+    const {data,error}=await sb.from('participants').select('*').order('created_at',{ascending:false});
+    document.getElementById('participants-loading').style.display='none';
+    if(error||!data||data.length===0){ document.getElementById('no-participants').style.display='block'; setStats(0,0,0,0); return; }
 
-    if (error || !data || data.length === 0) {
-      document.getElementById('no-participants').style.display = 'block';
-      document.getElementById('stat-total').textContent = '0';
-      document.getElementById('stat-avg').textContent = '0';
-      document.getElementById('stat-perfect').textContent = '0';
-      document.getElementById('stat-today').textContent = '0';
-      return;
-    }
+    const total=data.length;
+    const avgPre=(data.reduce((s,d)=>s+(d.pretest_score||0),0)/total).toFixed(1);
+    const avgPost=(data.reduce((s,d)=>s+(d.posttest_score||0),0)/total).toFixed(1);
+    const avgDelta=(data.reduce((s,d)=>s+(d.delta||0),0)/total).toFixed(1);
+    const today=new Date().toDateString();
+    const todayCount=data.filter(d=>new Date(d.created_at).toDateString()===today).length;
+    setStats(total,avgPre,avgPost,avgDelta,todayCount);
 
-    // Stats
-    const total = data.length;
-    const avg = (data.reduce((s,d) => s + (d.total_rings || 0), 0) / total).toFixed(1);
-    const perfect = data.filter(d => d.total_rings === 7).length;
-    const today = new Date().toDateString();
-    const todayCount = data.filter(d => new Date(d.created_at).toDateString() === today).length;
-
-    document.getElementById('stat-total').textContent = total;
-    document.getElementById('stat-avg').textContent = avg;
-    document.getElementById('stat-perfect').textContent = perfect;
-    document.getElementById('stat-today').textContent = todayCount;
-
-    // Table
-    const tbody = document.getElementById('participants-tbody');
-    tbody.innerHTML = '';
-    data.forEach((p, i) => {
-      const tr = document.createElement('tr');
-      tr.dataset.id = p.id;
-      const dt = new Date(p.created_at);
-      const timeStr = dt.toLocaleDateString('id-ID', {day:'2-digit',month:'short'}) + ' ' + dt.toLocaleTimeString('id-ID', {hour:'2-digit',minute:'2-digit'});
-      tr.innerHTML = `
-        <td><input type="checkbox" class="row-check" data-id="${p.id}" onchange="updateDeleteBar()" style="accent-color:#D4AF37;cursor:pointer;width:16px;height:16px;"></td>
+    const tbody=document.getElementById('participants-tbody');
+    tbody.innerHTML='';
+    data.forEach((p,i)=>{
+      const tr=document.createElement('tr');
+      tr.dataset.id=p.id;
+      const dt=new Date(p.created_at);
+      const ts=dt.toLocaleDateString('id-ID',{day:'2-digit',month:'short'})+' '+dt.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
+      const d=p.delta||0;
+      const dpill=d>0?'up':d<0?'down':'same';
+      const dsym=d>0?'+':'';
+      tr.innerHTML=`<td><input type="checkbox" class="row-check" data-id="${p.id}" onchange="updateDeleteBar()" style="accent-color:#D4AF37;cursor:pointer;width:15px;height:15px;"></td>
         <td style="color:var(--text-dim);font-size:0.8rem;">${i+1}</td>
-        <td style="font-weight:600;">${p.name || '—'}</td>
-        <td><span class="ring-pill">◆ ${p.total_rings || 0} / 7</span></td>
-        <td style="color:var(--text-dim);">${p.kuil1_rings ?? '—'}</td>
-        <td style="color:var(--text-dim);">${p.kuil2_rings ?? '—'}</td>
-        <td style="color:var(--text-dim);">${p.kuil3_rings ?? '—'}</td>
-        <td style="font-size:0.8rem;color:var(--text-dim);">${timeStr}</td>
-      `;
+        <td style="font-weight:600;">${p.name||'—'}</td>
+        <td style="color:var(--text-dim);">${p.origin||'—'}</td>
+        <td><span class="ring-pill" style="border-color:rgba(93,173,226,0.4);color:#5DADE2;">◆ ${p.pretest_score??'—'}</span></td>
+        <td><span class="ring-pill" style="border-color:rgba(46,204,113,0.4);color:#2ECC71;">◆ ${p.posttest_score??'—'}</span></td>
+        <td><span class="delta-pill ${dpill}">${dsym}${d}</span></td>
+        <td style="color:var(--text-dim);">${p.kuil1_rings??'—'}</td>
+        <td style="color:var(--text-dim);">${p.kuil2_rings??'—'}</td>
+        <td style="color:var(--text-dim);">${p.kuil3_rings??'—'}</td>
+        <td style="font-size:0.75rem;color:var(--text-dim);">${ts}</td>`;
       tbody.appendChild(tr);
     });
+    document.getElementById('participants-table-wrap').style.display='block';
+  } catch(e){ document.getElementById('participants-loading').style.display='none'; document.getElementById('no-participants').style.display='block'; document.getElementById('no-participants').textContent='Gagal memuat. Cek SQL setup.'; }
+}
 
-    document.getElementById('participants-table-wrap').style.display = 'block';
-  } catch(e) {
-    document.getElementById('participants-loading').style.display = 'none';
-    document.getElementById('no-participants').style.display = 'block';
-    document.getElementById('no-participants').textContent = 'Gagal memuat data. Pastikan tabel sudah dibuat.';
-  }
+function setStats(total,pre,post,delta,today=0){
+  document.getElementById('stat-total').textContent=total;
+  document.getElementById('stat-avg-pre').textContent=pre;
+  document.getElementById('stat-avg-post').textContent=post;
+  document.getElementById('stat-avg-delta').textContent=(delta>0?'+':'')+delta;
+  document.getElementById('stat-today').textContent=today;
+}
+
+// ===== EXPORT EXCEL =====
+async function exportExcel(){
+  toast('Menyiapkan Excel...', 2000);
+  try {
+    const {data,error}=await sb.from('participants').select('*').order('created_at',{ascending:true});
+    if(error||!data||data.length===0){ toast('Belum ada data peserta.'); return; }
+
+    const rows=data.map((p,i)=>({
+      'No': i+1,
+      'Nama': p.name||'',
+      'Kategori': p.origin||'',
+      'Skor Pretest': p.pretest_score??0,
+      'Skor Posttest': p.posttest_score??0,
+      'Delta (Peningkatan)': p.delta??0,
+      'Kuil 1 (Benar)': p.kuil1_rings??0,
+      'Kuil 2 (Benar)': p.kuil2_rings??0,
+      'Kuil 3 (Benar)': p.kuil3_rings??0,
+      'Total Cincin Kuil': p.total_kuil_rings??0,
+      'Waktu': new Date(p.created_at).toLocaleString('id-ID')
+    }));
+
+    const ws=XLSX.utils.json_to_sheet(rows);
+    // Column widths
+    ws['!cols']=[{wch:5},{wch:22},{wch:18},{wch:14},{wch:15},{wch:18},{wch:14},{wch:14},{wch:14},{wch:16},{wch:20}];
+
+    const wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,'Peserta',ws);
+
+    // Summary sheet
+    const summary=[
+      ['REKAP ARCAVIA QUIZ — The Three Trials of the Seven Seals',''],
+      ['Tanggal Export', new Date().toLocaleString('id-ID')],
+      ['',''],
+      ['Total Peserta', data.length],
+      ['Rata-rata Pretest', (data.reduce((s,d)=>s+(d.pretest_score||0),0)/data.length).toFixed(2)],
+      ['Rata-rata Posttest', (data.reduce((s,d)=>s+(d.posttest_score||0),0)/data.length).toFixed(2)],
+      ['Rata-rata Peningkatan', (data.reduce((s,d)=>s+(d.delta||0),0)/data.length).toFixed(2)],
+      ['Peserta dengan Peningkatan', data.filter(d=>d.delta>0).length],
+      ['Peserta Skor Sama', data.filter(d=>d.delta===0).length],
+      ['Peserta dengan Penurunan', data.filter(d=>d.delta<0).length],
+    ];
+    const ws2=XLSX.utils.aoa_to_sheet(summary);
+    ws2['!cols']=[{wch:30},{wch:20}];
+    XLSX.utils.book_append_sheet(wb,'Ringkasan',ws2);
+
+    XLSX.writeFile(wb,'Arcavia_Quiz_Rekap_'+new Date().toLocaleDateString('id-ID').replace(/\//g,'-')+'.xlsx');
+    toast('✦ Excel berhasil diunduh!');
+  } catch(e){ toast('Gagal export Excel.'); console.error(e); }
+}
+
+// ===== DELETE =====
+function toggleSelectAll(cb){ document.querySelectorAll('.row-check').forEach(c=>c.checked=cb.checked); updateDeleteBar(); }
+function updateDeleteBar(){
+  const checked=document.querySelectorAll('.row-check:checked');
+  const all=document.querySelectorAll('.row-check');
+  const bar=document.getElementById('delete-bar');
+  const allCb=document.getElementById('select-all');
+  if(checked.length>0){
+    bar.classList.add('visible');
+    document.getElementById('selected-count').textContent=checked.length+' peserta dipilih';
+    if(allCb){ allCb.indeterminate=checked.length>0&&checked.length<all.length; if(checked.length===all.length){allCb.indeterminate=false;allCb.checked=true;} }
+  } else { bar.classList.remove('visible'); if(allCb){allCb.indeterminate=false;allCb.checked=false;} }
+}
+function clearSelection(){ document.querySelectorAll('.row-check').forEach(c=>c.checked=false); updateDeleteBar(); }
+async function deleteSelected(){
+  const checked=[...document.querySelectorAll('.row-check:checked')];
+  if(!checked.length) return;
+  if(!confirm('Hapus '+checked.length+' data peserta yang dipilih?')) return;
+  const ids=checked.map(c=>parseInt(c.dataset.id));
+  try { const {error}=await sb.from('participants').delete().in('id',ids); if(error) throw error; toast('✦ '+ids.length+' data dihapus!'); loadAdminData(); } catch(e){ toast('Gagal hapus.'); }
+}
+async function confirmDeleteAll(){
+  if(!confirm('Hapus SEMUA data peserta?')) return;
+  if(!confirm('Yakin? Tidak bisa dibatalkan.')) return;
+  try { const {error}=await sb.from('participants').delete().neq('id',0); if(error) throw error; toast('✦ Semua data dihapus!'); loadAdminData(); } catch(e){ toast('Gagal hapus.'); }
 }
 
 // ===== QUESTION EDITOR =====
-let editableQuestions = [];
-
-async function loadQuestionsEditor() {
-  document.getElementById('questions-loading').style.display = 'block';
-  document.getElementById('questions-editor').style.display = 'none';
-  document.getElementById('save-questions-btn').style.display = 'none';
-
+let editableQuestions=[];
+async function loadQuestionsEditor(){
+  document.getElementById('questions-loading').style.display='block';
+  document.getElementById('questions-editor').style.display='none';
+  document.getElementById('save-questions-btn').style.display='none';
   try {
-    const { data, error } = await sb.from('questions').select('*').order('kuil').order('order');
-    editableQuestions = (data && data.length > 0)
-      ? data.map(d => ({...d, options: typeof d.options === 'string' ? JSON.parse(d.options) : d.options}))
-      : defaultQuestions.map((q,i) => ({...q, id: i+1}));
-  } catch(e) {
-    editableQuestions = defaultQuestions.map((q,i) => ({...q, id: i+1}));
-  }
-
-  renderQuestionsEditor();
-  document.getElementById('questions-loading').style.display = 'none';
-  document.getElementById('questions-editor').style.display = 'block';
-  document.getElementById('save-questions-btn').style.display = 'inline-block';
+    const {data,error}=await sb.from('questions').select('*').order('order');
+    editableQuestions=(data&&data.length>0)?data.map(d=>({...d,options:typeof d.options==='string'?JSON.parse(d.options):d.options})):defaultQuestions.map((q,i)=>({...q,id:i+1}));
+  } catch(e){ editableQuestions=defaultQuestions.map((q,i)=>({...q,id:i+1})); }
+  renderQEditor();
+  document.getElementById('questions-loading').style.display='none';
+  document.getElementById('questions-editor').style.display='block';
+  document.getElementById('save-questions-btn').style.display='inline-block';
 }
-
-function renderQuestionsEditor() {
-  const wrap = document.getElementById('questions-editor');
-  wrap.innerHTML = '';
-  const kuilColors = ['k1','k2','k3'];
-
-  [1,2,3].forEach(kuilNum => {
-    const kuilQs = editableQuestions.filter(q => q.kuil === kuilNum);
-    const header = document.createElement('div');
-    header.innerHTML = `<div style="font-family:'Cinzel',serif;font-size:0.8rem;color:var(--text-dim);letter-spacing:0.1em;text-transform:uppercase;margin:1rem 0 0.5rem;">— Kuil ${kuilNum} —</div>`;
-    wrap.appendChild(header);
-
-    kuilQs.forEach((q, qi) => {
-      const idx = editableQuestions.indexOf(q);
-      const div = document.createElement('div');
-      div.className = 'q-editor';
-      div.innerHTML = `
-        <div class="q-editor-header">
-          <span><span class="kuil-badge ${kuilColors[kuilNum-1]}" style="font-size:0.6rem;padding:0.2rem 0.6rem;">Kuil ${kuilNum}</span> &nbsp; Soal ${qi+1}</span>
-        </div>
-        <input type="text" class="q-field" placeholder="Pertanyaan..." value="${escHtml(q.question)}" data-idx="${idx}" data-field="question">
-        <div class="q-options-grid">
-          ${q.options.map((opt, oi) => `<input type="text" class="q-field" placeholder="Pilihan ${['A','B','C','D'][oi]}..." value="${escHtml(opt)}" data-idx="${idx}" data-field="option" data-optidx="${oi}">`).join('')}
-        </div>
-        <div class="q-correct-wrap">
-          <span>Jawaban benar:</span>
-          <select data-idx="${idx}" data-field="correct">
-            ${q.options.map((opt,oi) => `<option value="${oi}" ${oi===q.correct?'selected':''}>${['A','B','C','D'][oi]}. ${opt.substring(0,30)}</option>`).join('')}
-          </select>
-        </div>
-      `;
-      wrap.appendChild(div);
-    });
+function renderQEditor(){
+  const wrap=document.getElementById('questions-editor'); wrap.innerHTML='';
+  editableQuestions.forEach((q,idx)=>{
+    const div=document.createElement('div'); div.className='q-editor';
+    div.innerHTML=`<div class="q-editor-header">Soal ${idx+1} <span style="color:var(--text-dim);font-weight:400;">(Pretest & Posttest)</span></div>
+      <input type="text" class="q-field" placeholder="Pertanyaan..." value="${escH(q.question)}" data-idx="${idx}" data-field="question">
+      <div class="q-options-grid">
+        ${q.options.map((o,oi)=>'<input type="text" class="q-field" placeholder="Pilihan '+['A','B','C','D'][oi]+'..." value="'+escH(o)+'" data-idx="'+idx+'" data-field="option" data-oi="'+oi+'">').join('')}
+      </div>
+      <div class="q-correct-wrap"><span>Jawaban benar:</span>
+        <select data-idx="${idx}" data-field="correct">
+          ${q.options.map((o,oi)=>'<option value="'+oi+'" '+(oi===q.correct?'selected':'')+'>'+['A','B','C','D'][oi]+'. '+o.substring(0,25)+'</option>').join('')}
+        </select>
+      </div>`;
+    wrap.appendChild(div);
   });
-
-  // Bind events
-  wrap.querySelectorAll('[data-field]').forEach(el => {
-    el.addEventListener('input', function() {
-      const idx = parseInt(this.dataset.idx);
-      const field = this.dataset.field;
-      if (field === 'question') editableQuestions[idx].question = this.value;
-      else if (field === 'option') editableQuestions[idx].options[parseInt(this.dataset.optidx)] = this.value;
-      else if (field === 'correct') editableQuestions[idx].correct = parseInt(this.value);
+  wrap.querySelectorAll('[data-field]').forEach(el=>{
+    el.addEventListener('input',function(){
+      const idx=parseInt(this.dataset.idx);
+      if(this.dataset.field==='question') editableQuestions[idx].question=this.value;
+      else if(this.dataset.field==='option') editableQuestions[idx].options[parseInt(this.dataset.oi)]=this.value;
+      else if(this.dataset.field==='correct') editableQuestions[idx].correct=parseInt(this.value);
     });
   });
 }
-
-function escHtml(str) {
-  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-async function saveQuestions() {
-  const btn = document.getElementById('save-questions-btn');
-  btn.disabled = true;
-  btn.textContent = 'Menyimpan...';
-
+function escH(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+async function saveQuestions(){
+  const btn=document.getElementById('save-questions-btn');
+  btn.disabled=true; btn.textContent='Menyimpan...';
   try {
-    await sb.from('questions').delete().neq('kuil', 0);
-    const toInsert = editableQuestions.map(q => ({
-      kuil: q.kuil,
-      order: q.order,
-      question: q.question,
-      options: JSON.stringify(q.options),
-      correct: q.correct
-    }));
-    const { error } = await sb.from('questions').insert(toInsert);
-    if (error) throw error;
+    await sb.from('questions').delete().neq('id',0);
+    const ins=editableQuestions.map(q=>({kuil:q.kuil||0,order:q.order,question:q.question,options:JSON.stringify(q.options),correct:q.correct}));
+    const {error}=await sb.from('questions').insert(ins);
+    if(error) throw error;
     toast('✦ Soal berhasil disimpan!');
-    renderQuestionsEditor();
-  } catch(e) {
-    toast('Gagal menyimpan. Pastikan tabel "questions" sudah ada.');
-  }
-
-  btn.disabled = false;
-  btn.textContent = '✦ Simpan Semua Soal';
+  } catch(e){ toast('Gagal simpan. Cek tabel questions.'); }
+  btn.disabled=false; btn.textContent='✦ Simpan Soal';
 }
 
-function toggleSelectAll(cb) {
-  document.querySelectorAll('.row-check').forEach(c => c.checked = cb.checked);
-  updateDeleteBar();
-}
-
-function updateDeleteBar() {
-  const checked = document.querySelectorAll('.row-check:checked');
-  const bar = document.getElementById('delete-bar');
-  const allCb = document.getElementById('select-all');
-  const all = document.querySelectorAll('.row-check');
-  if (checked.length > 0) {
-    bar.style.display = 'flex';
-    document.getElementById('selected-count').textContent = `${checked.length} peserta dipilih`;
-    if (allCb) allCb.indeterminate = checked.length > 0 && checked.length < all.length;
-    if (allCb && checked.length === all.length) { allCb.indeterminate = false; allCb.checked = true; }
-  } else {
-    bar.style.display = 'none';
-    if (allCb) { allCb.indeterminate = false; allCb.checked = false; }
-  }
-}
-
-function clearSelection() {
-  document.querySelectorAll('.row-check').forEach(c => c.checked = false);
-  const allCb = document.getElementById('select-all');
-  if (allCb) { allCb.checked = false; allCb.indeterminate = false; }
-  updateDeleteBar();
-}
-
-async function deleteSelected() {
-  const checked = [...document.querySelectorAll('.row-check:checked')];
-  if (checked.length === 0) return;
-  if (!confirm('Hapus ' + checked.length + ' data peserta yang dipilih?')) return;
-  const ids = checked.map(c => parseInt(c.dataset.id));
-  try {
-    const { error } = await sb.from('participants').delete().in('id', ids);
-    if (error) throw error;
-    toast('✦ ' + ids.length + ' data berhasil dihapus!');
-    loadAdminData();
-  } catch(e) {
-    toast('Gagal menghapus data.');
-  }
-}
-
-async function confirmDeleteAll() {
-  if (!confirm('Hapus SEMUA data peserta? Ini tidak bisa dibatalkan.')) return;
-  if (!confirm('Yakin? Semua data test akan dihapus permanen.')) return;
-  try {
-    const { error } = await sb.from('participants').delete().neq('id', 0);
-    if (error) throw error;
-    toast('✦ Semua data peserta berhasil dihapus!');
-    loadAdminData();
-  } catch(e) {
-    toast('Gagal menghapus data.');
-  }
-}
-
-// Keyboard shortcut for admin
-let adminSeq = '';
-document.addEventListener('keydown', e => {
-  adminSeq += e.key.toLowerCase();
-  if (adminSeq.length > 6) adminSeq = adminSeq.slice(-6);
-  if (adminSeq.endsWith('admin')) showAdminLogin();
-});
+let adminSeq='';
+document.addEventListener('keydown',e=>{ adminSeq+=e.key.toLowerCase(); if(adminSeq.length>6) adminSeq=adminSeq.slice(-6); if(adminSeq.endsWith('admin')) showAdminLogin(); });
 </script>
 </body>
 </html>
