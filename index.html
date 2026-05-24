@@ -618,6 +618,8 @@ function proceedAfterPosttest(){
   if(state.currentKuil<2){
     showKuilWaiting(state.currentKuil+1);
   } else {
+    const btn=document.getElementById('pkc-next-btn');
+    if(btn) btn.disabled=true;
     showFinal();
   }
 }
@@ -658,7 +660,10 @@ async function showFinal(){
 }
 
 // ===== SAVE =====
+let _saving = false;
 async function saveResult(){
+  if(_saving) return;
+  _saving = true;
   const posttestTotal=state.posttestKuilScores.reduce((a,b)=>a+b,0);
   const payload={
     session_id:state.sessionId, name:state.playerName, origin:state.playerOrigin,
@@ -673,7 +678,8 @@ async function saveResult(){
     created_at:new Date().toISOString()
   };
   try { await sb.from('participants').insert(payload); } catch(e){ console.error('Supabase save failed',e); }
-  try { await fetch(SHEETS_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}); } catch(e){ console.error('Sheets save failed',e); }
+  try { await fetch(SHEETS_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type'':'application/json'},body:JSON.stringify(payload)}); } catch(e){ console.error('Sheets save failed',e); }
+  _saving = false;
 }
 
 function restartQuiz(){ document.getElementById('player-name').value=''; document.getElementById('player-origin').value=''; showScreen('landing-screen'); }
