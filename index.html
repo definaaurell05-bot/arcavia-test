@@ -625,7 +625,10 @@ function proceedAfterPosttest(){
 }
 
 // ===== FINAL =====
+let _finalShown = false;
 async function showFinal(){
+  if(_finalShown) return;
+  _finalShown = true;
   await saveResult();
   const pre=state.pretestScore;
   const post=state.posttestKuilScores.reduce((a,b)=>a+b,0);
@@ -678,11 +681,11 @@ async function saveResult(){
     created_at:new Date().toISOString()
   };
   try { await sb.from('participants').insert(payload); } catch(e){ console.error('Supabase save failed',e); }
-  try { await fetch(SHEETS_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type'':'application/json'},body:JSON.stringify(payload)}); } catch(e){ console.error('Sheets save failed',e); }
+  try { await fetch(SHEETS_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}); } catch(e){ console.error('Sheets save failed',e); }
   _saving = false;
 }
 
-function restartQuiz(){ document.getElementById('player-name').value=''; document.getElementById('player-origin').value=''; showScreen('landing-screen'); }
+function restartQuiz(){ document.getElementById('player-name').value=''; document.getElementById('player-origin').value=''; _finalShown=false; _saving=false; showScreen('landing-screen'); }
 
 // ===== ADMIN =====
 function showAdminLogin(){ showScreen('admin-login-screen'); }
