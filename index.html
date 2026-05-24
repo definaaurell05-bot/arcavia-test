@@ -374,13 +374,13 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 // ===== DEFAULT QUESTIONS =====
 // Soal 1-2 → Kuil 1 | Soal 3-4 → Kuil 2 | Soal 5-7 → Kuil 3
 const defaultQuestions = [
-  { id:1, order:1, question:"Di negara manakah panahan modern pertama kali dikembangkan sebagai olahraga kompetitif?", options:["Inggris","Cina","Persia","Jepang"], correct:0 },
+  { id:1, order:1, question:"Keunggulan utama compound bow dibandingkan recurve bow adalah...", options:["Lebih ringan dan mudah dibawa","Tidak memerlukan anak panah khusus","Memiliki sistem pengurangan beban sehingga lebih mudah menahan posisi full draw","Lebih murah dan mudah dirawat"], correct:2 },
   { id:2, order:2, question:"Pada tahun berapa panahan pertama kali masuk sebagai cabang olahraga Olimpiade modern?", options:["1896","1900","1908","1920"], correct:1 },
-  { id:3, order:3, question:"Bagian panah yang berfungsi menstabilkan laju anak panah saat melayang di udara disebut?", options:["Nock","Fletch (bulu)","Point","Shaft"], correct:1 },
-  { id:4, order:4, question:"Posisi berdiri tegak menyamping menghadap target dalam teknik memanah disebut?", options:["Square stance","Open stance","Side stance","Natural stance"], correct:0 },
-  { id:5, order:5, question:"Jarak standar untuk kategori Recurve Senior putra dalam kompetisi outdoor World Archery adalah?", options:["50 meter","60 meter","70 meter","90 meter"], correct:2 },
-  { id:6, order:6, question:"Zona warna kuning (gold) pada target face panahan mendapat nilai berapa?", options:["8 dan 9","9 dan 10","10 dan X","X saja"], correct:1 },
-  { id:7, order:7, question:"Gerakan melepas tali busur secara terkontrol dan konsisten dalam teknik memanah disebut?", options:["Draw","Anchor","Release","Follow-through"], correct:2 }
+  { id:3, order:3, question:"Dalam teknik dasar memanah, jenis release yang direkomendasikan adalah...", options:["Dead release","Static release","Active release","Passive release"], correct:2 },
+  { id:4, order:4, question:"Pada metode RICE untuk penanganan cedera, huruf \"E\" merujuk pada tindakan...", options:["Mengistirahatkan bagian tubuh yang cedera","Meninggikan bagian cedera melebihi ketinggian jantung","Memberikan efek dingin pada area cedera","Memberikan penekanan pada jaringan yang cedera"], correct:1 },
+  { id:5, order:5, question:"Pada target recurve bow, lapisan berwarna kuning mendapat skor berapa?", options:["7–8","8–9","9–10","10 saja"], correct:2 },
+  { id:6, order:6, question:"Pada teknik recurve (2 under), saat drawing tali busur ditarik hingga menyentuh titik anchor, yaitu...", options:["Dahi, hidung, atau dagu","Ujung hidung, dagu, atau bibir","Telinga, dagu, atau dahi","Bibir, pipi, atau dagu"], correct:1 },
+  { id:7, order:7, question:"Pada fase pertama, apa perbedaan open stance jika dibandingkan dengan square stance?", options:["Pada open stance kedua kaki sejajar dengan target","Pada open stance kaki kiri lurus menghadap target","Pada square stance kaki kiri lurus menghadap target","Pada square stance kedua kaki dibuka sejauh mungkin"], correct:1 }
 ];
 
 // Info per kuil: nama, badge, qRange (index soal dari defaultQuestions)
